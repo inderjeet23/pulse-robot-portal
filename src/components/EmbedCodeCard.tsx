@@ -1,19 +1,36 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Copy, ExternalLink, Check } from "lucide-react";
+import { Copy, ExternalLink, Check, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
 
 export function EmbedCodeCard() {
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
+  const { propertyManager, loading } = useAuth();
+
+  if (loading || !propertyManager) {
+    return (
+      <Card className="bg-gradient-card shadow-card border-0">
+        <CardHeader>
+          <CardTitle className="text-xl font-bold text-foreground">Widget Embed Code</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-32">
+            <Loader2 className="w-6 h-6 animate-spin" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const embedCode = `<script>
-  window.lovableSettings = { botId: 'YOUR-BOT-ID' };
+  window.lovableSettings = { botId: '${propertyManager.bot_id}' };
 </script>
 <script src="https://cdn.lovable.ai/widget.js" async></script>`;
 
-  const hostedLink = "https://pulserobot.ai/your-assistant-link";
+  const hostedLink = propertyManager.hosted_link;
 
   const copyToClipboard = async () => {
     try {

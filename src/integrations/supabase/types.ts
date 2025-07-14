@@ -14,7 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      property_managers: {
+        Row: {
+          bot_id: string
+          brand_color: string
+          created_at: string
+          email: string
+          hosted_link: string
+          id: string
+          logo_url: string | null
+          name: string
+          routing_email: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bot_id?: string
+          brand_color?: string
+          created_at?: string
+          email: string
+          hosted_link: string
+          id?: string
+          logo_url?: string | null
+          name: string
+          routing_email?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bot_id?: string
+          brand_color?: string
+          created_at?: string
+          email?: string
+          hosted_link?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+          routing_email?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

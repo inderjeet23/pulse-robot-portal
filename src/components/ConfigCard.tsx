@@ -1,35 +1,109 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Save, Upload, Palette } from "lucide-react";
+import { Save, Upload, Palette, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 export function ConfigCard() {
-  const [email, setEmail] = useState("manager@example.com");
+  const { toast } = useToast();
+  const { propertyManager, updatePropertyManager, loading: authLoading } = useAuth();
+  const [email, setEmail] = useState("");
   const [color, setColor] = useState("#ff6b35");
   const [saving, setSaving] = useState(false);
-  const { toast } = useToast();
+  const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    if (propertyManager) {
+      setEmail(propertyManager.routing_email || "");
+      setColor(propertyManager.brand_color);
+    }
+  }, [propertyManager]);
+
+  if (authLoading || !propertyManager) {
+    return (
+      <Card className="bg-gradient-card shadow-card border-0">
+        <CardHeader>
+          <CardTitle className="text-xl font-bold text-foreground">Quick Actions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center justify-center h-32">
+            <Loader2 className="w-6 h-6 animate-spin" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   const handleSave = async () => {
     setSaving(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    setSaving(false);
-    toast({
-      title: "Settings saved!",
-      description: "Your configuration has been updated successfully.",
+    
+    const { error } = await updatePropertyManager({
+      routing_email: email,
+      brand_color: color,
     });
+    
+    setSaving(false);
   };
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file) {
+    if (!file || !propertyManager) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
       toast({
-        title: "Logo uploaded!",
-        description: `${file.name} has been uploaded successfully.`,
+        title: "Invalid file type",
+        description: "Please upload an image file.",
+        variant: "destructive",
       });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Please upload an image smaller than 5MB.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${propertyManager.user_id}/${Date.now()}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('property-logos')
+        .upload(fileName, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data: urlData } = supabase.storage
+        .from('property-logos')
+        .getPublicUrl(fileName);
+
+      await updatePropertyManager({
+        logo_url: urlData.publicUrl,
+      });
+
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      toast({
+        title: "Upload failed",
+        description: "Failed to upload logo. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -58,8 +132,17 @@ export function ConfigCard() {
               disabled={saving}
               className="shadow-button"
             >
-              <Save className="w-4 h-4 mr-2" />
-              {saving ? "Saving..." : "Save"}
+              {saving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Save
+                </>
+              )}
             </Button>
           </div>
         </div>
@@ -78,6 +161,7 @@ export function ConfigCard() {
                 type="file"
                 accept="image/*"
                 onChange={handleFileUpload}
+                disabled={uploading}
                 className="hidden"
                 id="logo-upload"
               />
@@ -85,11 +169,33 @@ export function ConfigCard() {
                 onClick={() => document.getElementById('logo-upload')?.click()}
                 variant="outline"
                 className="w-full justify-start"
+                disabled={uploading}
               >
-                <Upload className="w-4 h-4 mr-2" />
-                Choose File
+                {uploading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Uploading...
+                  </>
+                ) : (
+                  <>
+                    <Upload className="w-4 h-4 mr-2" />
+                    Choose File
+                  </>
+                )}
               </Button>
             </div>
+            {propertyManager.logo_url && (
+              <div className="mt-4">
+                <Label className="text-sm font-medium text-foreground">Current Logo:</Label>
+                <div className="mt-2 p-2 border rounded-md bg-accent/10">
+                  <img 
+                    src={propertyManager.logo_url} 
+                    alt="Current logo"
+                    className="max-h-20 max-w-full object-contain"
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Color Picker */}

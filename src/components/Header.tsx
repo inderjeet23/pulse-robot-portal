@@ -1,7 +1,10 @@
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 import { LogOut } from "lucide-react";
 
 export function Header() {
+  const { signOut } = useAuth();
+
   return (
     <header className="bg-card/80 backdrop-blur-md border-b border-border sticky top-0 z-50">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -30,7 +33,7 @@ export function Header() {
         </nav>
 
         {/* Log Out Button */}
-        <Button variant="outline" size="sm" className="gap-2">
+        <Button variant="outline" size="sm" className="gap-2" onClick={signOut}>
           <LogOut className="w-4 h-4" />
           <span className="hidden sm:inline">Log Out</span>
         </Button>

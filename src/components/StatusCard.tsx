@@ -1,12 +1,24 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, XCircle, Loader2 } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
-interface StatusCardProps {
-  isLive: boolean;
-  managerName: string;
-}
+export function StatusCard() {
+  const { propertyManager, loading } = useAuth();
+  
+  if (loading || !propertyManager) {
+    return (
+      <Card className="bg-gradient-card shadow-card border-0">
+        <CardContent className="p-6">
+          <div className="flex items-center justify-center h-24">
+            <Loader2 className="w-6 h-6 animate-spin" />
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
-export function StatusCard({ isLive, managerName }: StatusCardProps) {
+  const isLive = propertyManager.routing_email && propertyManager.bot_id;
+  const managerName = propertyManager.name;
   return (
     <Card className="bg-gradient-card shadow-card border-0">
       <CardContent className="p-6">

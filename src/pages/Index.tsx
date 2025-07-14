@@ -7,17 +7,13 @@ import { FAQSection } from "@/components/FAQSection";
 import { SupportCallout } from "@/components/SupportCallout";
 
 const Index = () => {
-  // Mock data - in a real app, this would come from an API
-  const managerName = "Sarah";
-  const isLive = true;
-
   return (
     <div className="min-h-screen bg-gradient-hero">
       <Header />
       
       <main className="container mx-auto px-4 py-8 space-y-8 max-w-4xl">
         {/* Dashboard Hero */}
-        <StatusCard isLive={isLive} managerName={managerName} />
+        <StatusCard />
         
         {/* Widget Embed Code */}
         <EmbedCodeCard />
