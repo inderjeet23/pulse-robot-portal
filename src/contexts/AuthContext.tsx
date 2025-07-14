@@ -53,6 +53,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (data) {
         setPropertyManager(data);
+      } else {
+        // No property manager found, create one
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const name = user.user_metadata?.name || user.email?.split('@')[0] || 'User';
+          await createPropertyManager(user, name);
+        }
       }
     } catch (error) {
       console.error('Error fetching property manager:', error);
