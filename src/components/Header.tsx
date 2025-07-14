@@ -18,16 +18,44 @@ export function Header() {
 
         {/* Navigation */}
         <nav className="hidden md:flex items-center space-x-6">
-          <a href="#" className="text-foreground hover:text-primary transition-colors">
+          <a 
+            href="#dashboard" 
+            className="text-foreground hover:text-primary transition-colors cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }}
+          >
             Dashboard
           </a>
-          <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+          <a 
+            href="#setup-guide" 
+            className="text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById('setup-guide')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+          >
             Setup Guide
           </a>
-          <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+          <a 
+            href="#faq" 
+            className="text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+          >
             FAQ
           </a>
-          <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
+          <a 
+            href="#support" 
+            className="text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById('support')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+          >
             Support
           </a>
         </nav>

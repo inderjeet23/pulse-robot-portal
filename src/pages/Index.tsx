@@ -26,13 +26,19 @@ const Index = () => {
         <ConfigCard />
         
         {/* Setup Guide */}
-        <SetupGuide />
+        <div id="setup-guide">
+          <SetupGuide />
+        </div>
         
         {/* FAQ Section */}
-        <FAQSection />
+        <div id="faq">
+          <FAQSection />
+        </div>
         
         {/* Support Callout */}
-        <SupportCallout />
+        <div id="support">
+          <SupportCallout />
+        </div>
       </main>
       
       {/* Footer spacing */}
