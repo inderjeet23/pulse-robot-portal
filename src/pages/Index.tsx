@@ -5,6 +5,7 @@ import { ConfigCard } from "@/components/ConfigCard";
 import { SetupGuide } from "@/components/SetupGuide";
 import { FAQSection } from "@/components/FAQSection";
 import { SupportCallout } from "@/components/SupportCallout";
+import { RequestsOverview } from "@/components/RequestsOverview";
 
 const Index = () => {
   return (
@@ -14,6 +15,9 @@ const Index = () => {
       <main className="container mx-auto px-4 py-8 space-y-8 max-w-4xl">
         {/* Dashboard Hero */}
         <StatusCard />
+        
+        {/* Maintenance Requests */}
+        <RequestsOverview />
         
         {/* Widget Embed Code */}
         <EmbedCodeCard />

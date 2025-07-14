@@ -14,6 +14,75 @@ export type Database = {
   }
   public: {
     Tables: {
+      maintenance_requests: {
+        Row: {
+          actual_cost: number | null
+          assigned_to: string | null
+          completed_at: string | null
+          created_at: string
+          description: string
+          estimated_cost: number | null
+          id: string
+          images: string[] | null
+          notes: string | null
+          priority: string
+          property_address: string
+          property_manager_id: string
+          request_type: string
+          status: string
+          tenant_email: string | null
+          tenant_name: string
+          tenant_phone: string | null
+          title: string
+          unit_number: string | null
+          updated_at: string
+        }
+        Insert: {
+          actual_cost?: number | null
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description: string
+          estimated_cost?: number | null
+          id?: string
+          images?: string[] | null
+          notes?: string | null
+          priority?: string
+          property_address: string
+          property_manager_id: string
+          request_type: string
+          status?: string
+          tenant_email?: string | null
+          tenant_name: string
+          tenant_phone?: string | null
+          title: string
+          unit_number?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actual_cost?: number | null
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string
+          estimated_cost?: number | null
+          id?: string
+          images?: string[] | null
+          notes?: string | null
+          priority?: string
+          property_address?: string
+          property_manager_id?: string
+          request_type?: string
+          status?: string
+          tenant_email?: string | null
+          tenant_name?: string
+          tenant_phone?: string | null
+          title?: string
+          unit_number?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       property_managers: {
         Row: {
           bot_id: string
