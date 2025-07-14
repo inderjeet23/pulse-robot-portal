@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Accordion,
@@ -5,10 +6,29 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { HelpCircle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { HelpCircle, Search, ChevronDown } from "lucide-react";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
+
+interface FAQ {
+  question: string;
+  answer: string;
+}
+
+interface FAQCategory {
+  category: string;
+  questions: FAQ[];
+}
 
 export function FAQSection() {
-  const faqs = [
+  const [searchQuery, setSearchQuery] = useState("");
+  const [openCategories, setOpenCategories] = useState<Record<string, boolean>>({});
+
+  const faqs: FAQCategory[] = [
     {
       category: "Getting Started",
       questions: [
@@ -124,6 +144,40 @@ export function FAQSection() {
     }
   ];
 
+  // Filter FAQs based on search query
+  const filteredFAQs = faqs.map(category => ({
+    ...category,
+    questions: category.questions.filter(faq =>
+      faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      faq.answer.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  })).filter(category => category.questions.length > 0);
+
+  // Highlight matching text
+  const highlightText = (text: string, query: string) => {
+    if (!query) return text;
+    const regex = new RegExp(`(${query})`, 'gi');
+    const parts = text.split(regex);
+    return parts.map((part, index) =>
+      regex.test(part) ? (
+        <mark key={index} className="bg-primary/20 text-primary rounded px-1">
+          {part}
+        </mark>
+      ) : (
+        part
+      )
+    );
+  };
+
+  const toggleCategory = (categoryName: string) => {
+    setOpenCategories(prev => ({
+      ...prev,
+      [categoryName]: !prev[categoryName]
+    }));
+  };
+
+  const hasSearchResults = filteredFAQs.length > 0;
+
   return (
     <Card className="bg-gradient-card shadow-card border-0">
       <CardHeader>
@@ -133,26 +187,76 @@ export function FAQSection() {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-6">
-          {faqs.map((category, categoryIndex) => (
-            <div key={categoryIndex}>
-              <h3 className="text-lg font-semibold text-foreground mb-3 border-b border-border pb-2">
-                {category.category}
-              </h3>
-              <Accordion type="single" collapsible className="w-full">
-                {category.questions.map((faq, questionIndex) => (
-                  <AccordionItem key={questionIndex} value={`faq-${categoryIndex}-${questionIndex}`}>
-                    <AccordionTrigger className="text-left font-medium">
-                      {faq.question}
-                    </AccordionTrigger>
-                    <AccordionContent className="text-muted-foreground">
-                      {faq.answer}
-                    </AccordionContent>
-                  </AccordionItem>
-                ))}
-              </Accordion>
+        {/* Search Bar */}
+        <div className="relative mb-6">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Input
+            type="text"
+            placeholder="Search FAQs..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10 bg-background border-border focus:border-primary transition-colors"
+          />
+        </div>
+
+        {/* FAQ Content */}
+        <div className="space-y-4">
+          {!hasSearchResults && searchQuery ? (
+            <div className="text-center py-8">
+              <div className="text-muted-foreground">
+                <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p>No FAQs found for your search.</p>
+                <p className="text-sm mt-1">Try different keywords or browse categories below.</p>
+              </div>
             </div>
-          ))}
+          ) : (
+            filteredFAQs.map((category, categoryIndex) => (
+              <div key={categoryIndex} className="border border-border rounded-lg bg-background">
+                <Collapsible
+                  open={searchQuery ? true : openCategories[category.category]}
+                  onOpenChange={() => !searchQuery && toggleCategory(category.category)}
+                >
+                  <CollapsibleTrigger
+                    className={`w-full px-4 py-3 text-left hover:bg-muted/50 transition-colors rounded-lg ${
+                      searchQuery ? 'cursor-default' : 'cursor-pointer'
+                    }`}
+                    disabled={!!searchQuery}
+                  >
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-foreground text-lg">
+                        {category.category}
+                      </h3>
+                      {!searchQuery && (
+                        <ChevronDown 
+                          className={`w-4 h-4 text-muted-foreground transition-transform duration-200 ${
+                            openCategories[category.category] ? 'rotate-180' : ''
+                          }`}
+                        />
+                      )}
+                    </div>
+                  </CollapsibleTrigger>
+                  <CollapsibleContent className="px-4 pb-3">
+                    <Accordion type="single" collapsible className="w-full">
+                      {category.questions.map((faq, questionIndex) => (
+                        <AccordionItem 
+                          key={questionIndex} 
+                          value={`faq-${categoryIndex}-${questionIndex}`}
+                          className="border-border/50"
+                        >
+                          <AccordionTrigger className="text-left font-medium hover:text-primary transition-colors">
+                            {highlightText(faq.question, searchQuery)}
+                          </AccordionTrigger>
+                          <AccordionContent className="text-muted-foreground leading-relaxed">
+                            {highlightText(faq.answer, searchQuery)}
+                          </AccordionContent>
+                        </AccordionItem>
+                      ))}
+                    </Accordion>
+                  </CollapsibleContent>
+                </Collapsible>
+              </div>
+            ))
+          )}
         </div>
       </CardContent>
     </Card>
