@@ -6,6 +6,8 @@ import { SetupGuide } from "@/components/SetupGuide";
 import { FAQSection } from "@/components/FAQSection";
 import { SupportCallout } from "@/components/SupportCallout";
 import { RequestsOverview } from "@/components/RequestsOverview";
+import { RentOverview } from "@/components/RentOverview";
+import { TenantManagement } from "@/components/TenantManagement";
 
 const Index = () => {
   return (
@@ -18,6 +20,12 @@ const Index = () => {
         
         {/* Maintenance Requests */}
         <RequestsOverview />
+        
+        {/* Rent Management Section */}
+        <div id="rent-management" className="space-y-8">
+          <RentOverview />
+          <TenantManagement />
+        </div>
         
         {/* Widget Embed Code */}
         <EmbedCodeCard />

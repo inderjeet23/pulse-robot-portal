@@ -29,6 +29,16 @@ export function Header() {
             Dashboard
           </a>
           <a 
+            href="#rent-management" 
+            className="text-muted-foreground hover:text-primary transition-colors cursor-pointer"
+            onClick={(e) => {
+              e.preventDefault();
+              document.getElementById('rent-management')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+          >
+            Rent Management
+          </a>
+          <a 
             href="#setup-guide" 
             className="text-muted-foreground hover:text-primary transition-colors cursor-pointer"
             onClick={(e) => {
