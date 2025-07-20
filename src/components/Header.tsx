@@ -1,81 +1,67 @@
 import { Button } from "@/components/ui/button";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Command, CommandDialog, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { useAuth } from "@/contexts/AuthContext";
-import { LogOut } from "lucide-react";
+import { Search, User } from "lucide-react";
+import { useState } from "react";
 
-export function Header() {
+interface HeaderProps {
+  title: string;
+}
+
+export const Header = ({ title }: HeaderProps) => {
   const { signOut } = useAuth();
+  const [commandOpen, setCommandOpen] = useState(false);
 
   return (
-    <header className="bg-card/80 backdrop-blur-md border-b border-border sticky top-0 z-50">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        {/* Logo */}
-        <div className="flex items-center space-x-2">
-          <div className="w-8 h-8 bg-gradient-primary rounded-lg flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-lg">*</span>
+    <>
+      <header className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b border-border/40">
+        <div className="flex h-14 items-center px-4">
+          <SidebarTrigger className="mr-4" />
+          <div className="flex flex-1 items-center justify-between">
+            <h1 className="text-lg font-semibold">{title}</h1>
+            <div className="flex items-center gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setCommandOpen(true)}
+                className="relative w-40 justify-start text-sm text-muted-foreground"
+              >
+                <Search className="mr-2 h-4 w-4" />
+                Search...
+              </Button>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="relative h-8 w-8 rounded-full">
+                    <User className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuItem onClick={() => signOut()}>
+                    Log out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
-          <span className="text-xl font-bold text-foreground">Pulse Robot</span>
         </div>
+      </header>
 
-        {/* Navigation */}
-        <nav className="hidden md:flex items-center space-x-6">
-          <a 
-            href="#dashboard" 
-            className="text-foreground hover:text-primary transition-colors cursor-pointer"
-            onClick={(e) => {
-              e.preventDefault();
-              window.scrollTo({ top: 0, behavior: 'smooth' });
-            }}
-          >
-            Dashboard
-          </a>
-          <a 
-            href="#rent-management" 
-            className="text-muted-foreground hover:text-primary transition-colors cursor-pointer"
-            onClick={(e) => {
-              e.preventDefault();
-              document.getElementById('rent-management')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-          >
-            Rent Management
-          </a>
-          <a 
-            href="#setup-guide" 
-            className="text-muted-foreground hover:text-primary transition-colors cursor-pointer"
-            onClick={(e) => {
-              e.preventDefault();
-              document.getElementById('setup-guide')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-          >
-            Setup Guide
-          </a>
-          <a 
-            href="#faq" 
-            className="text-muted-foreground hover:text-primary transition-colors cursor-pointer"
-            onClick={(e) => {
-              e.preventDefault();
-              document.getElementById('faq')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-          >
-            FAQ
-          </a>
-          <a 
-            href="#support" 
-            className="text-muted-foreground hover:text-primary transition-colors cursor-pointer"
-            onClick={(e) => {
-              e.preventDefault();
-              document.getElementById('support')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-          >
-            Support
-          </a>
-        </nav>
-
-        {/* Log Out Button */}
-        <Button variant="outline" size="sm" className="gap-2" onClick={signOut}>
-          <LogOut className="w-4 h-4" />
-          <span className="hidden sm:inline">Log Out</span>
-        </Button>
-      </div>
-    </header>
+      <CommandDialog open={commandOpen} onOpenChange={setCommandOpen}>
+        <CommandInput placeholder="Search..." />
+        <CommandList>
+          <CommandEmpty>No results found.</CommandEmpty>
+          <CommandGroup heading="Navigation">
+            <CommandItem>Dashboard</CommandItem>
+            <CommandItem>Maintenance Requests</CommandItem>
+            <CommandItem>Rent Management</CommandItem>
+            <CommandItem>Tenants</CommandItem>
+            <CommandItem>Setup & Config</CommandItem>
+          </CommandGroup>
+        </CommandList>
+      </CommandDialog>
+    </>
   );
-}
+};

@@ -5,7 +5,12 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
-import Index from "./pages/Index";
+import { AppLayout } from "@/components/AppLayout";
+import Dashboard from "./pages/Dashboard";
+import MaintenancePage from "./pages/MaintenancePage";
+import RentPage from "./pages/RentPage";
+import TenantsPage from "./pages/TenantsPage";
+import SetupPage from "./pages/SetupPage";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import TenantPortal from "./pages/TenantPortal";
@@ -30,9 +35,15 @@ const App = () => (
             } />
             <Route path="/" element={
               <ProtectedRoute>
-                <Index />
+                <AppLayout />
               </ProtectedRoute>
-            } />
+            }>
+              <Route index element={<Dashboard />} />
+              <Route path="maintenance" element={<MaintenancePage />} />
+              <Route path="rent" element={<RentPage />} />
+              <Route path="tenants" element={<TenantsPage />} />
+              <Route path="setup" element={<SetupPage />} />
+            </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
