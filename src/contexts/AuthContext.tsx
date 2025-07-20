@@ -27,6 +27,8 @@ interface AuthContextType {
   signOut: () => Promise<void>;
   updatePropertyManager: (updates: Partial<PropertyManager>) => Promise<{ error: any }>;
   refreshPropertyManager: () => Promise<void>;
+  resetPassword: (email: string) => Promise<{ error: any }>;
+  updatePassword: (newPassword: string) => Promise<{ error: any }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -237,6 +239,34 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const resetPassword = async (email: string) => {
+    const redirectUrl = `${window.location.origin}/update-password`;
+    
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: redirectUrl,
+    });
+    
+    if (error) {
+      console.error('Reset password error:', error);
+      return { error };
+    }
+    
+    return { error: null };
+  };
+
+  const updatePassword = async (newPassword: string) => {
+    const { error } = await supabase.auth.updateUser({
+      password: newPassword,
+    });
+    
+    if (error) {
+      console.error('Update password error:', error);
+      return { error };
+    }
+    
+    return { error: null };
+  };
+
   const value = {
     user,
     session,
@@ -247,6 +277,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signOut,
     updatePropertyManager,
     refreshPropertyManager,
+    resetPassword,
+    updatePassword,
   };
 
   return (
