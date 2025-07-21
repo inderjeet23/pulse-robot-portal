@@ -11,6 +11,7 @@ import MaintenancePage from "./pages/MaintenancePage";
 import RentPage from "./pages/RentPage";
 import TenantsPage from "./pages/TenantsPage";
 import SetupPage from "./pages/SetupPage";
+import FAQSection from "./pages/FAQSection";
 import Auth from "./pages/Auth";
 import NotFound from "./pages/NotFound";
 import TenantPortal from "./pages/TenantPortal";
@@ -43,6 +44,7 @@ const App = () => (
               <Route path="rent" element={<RentPage />} />
               <Route path="tenants" element={<TenantsPage />} />
               <Route path="setup" element={<SetupPage />} />
+              <Route path="faq" element={<FAQSection />} />
             </Route>
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />

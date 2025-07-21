@@ -9,19 +9,21 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 interface DashboardStats {
-  overdueRent: number;
+  overdueRentAmount: number;
+  overdueTenantsCount: number;
   newRequests: number;
   totalTenants: number;
-  totalRevenue: number;
+  leasesExpiringSoon: number;
 }
 
 const Dashboard = () => {
   const { propertyManager } = useAuth();
   const [stats, setStats] = useState<DashboardStats>({
-    overdueRent: 0,
+    overdueRentAmount: 0,
+    overdueTenantsCount: 0,
     newRequests: 0,
     totalTenants: 0,
-    totalRevenue: 0,
+    leasesExpiringSoon: 0,
   });
   const [loading, setLoading] = useState(true);
 
@@ -30,10 +32,10 @@ const Dashboard = () => {
       if (!propertyManager?.id) return;
 
       try {
-        // Fetch overdue rent records
+        // Fetch overdue rent records with amounts
         const { data: overdueRent } = await supabase
           .from("rent_records")
-          .select("*")
+          .select("amount_due, late_fees")
           .eq("property_manager_id", propertyManager.id)
           .eq("status", "overdue");
 
@@ -47,24 +49,30 @@ const Dashboard = () => {
         // Fetch total tenants
         const { data: tenants } = await supabase
           .from("tenants")
-          .select("*")
+          .select("lease_end_date")
           .eq("property_manager_id", propertyManager.id);
 
-        // Fetch total revenue (paid rent)
-        const { data: paidRent } = await supabase
-          .from("rent_records")
-          .select("amount_paid")
-          .eq("property_manager_id", propertyManager.id)
-          .eq("status", "paid");
+        // Calculate leases expiring in next 60 days
+        const today = new Date();
+        const sixtyDaysFromNow = new Date();
+        sixtyDaysFromNow.setDate(today.getDate() + 60);
+        
+        const leasesExpiringSoon = tenants?.filter(tenant => {
+          if (!tenant.lease_end_date) return false;
+          const leaseEndDate = new Date(tenant.lease_end_date);
+          return leaseEndDate >= today && leaseEndDate <= sixtyDaysFromNow;
+        }).length || 0;
 
-        const totalRevenue = paidRent?.reduce((sum, record) => 
-          sum + (Number(record.amount_paid) || 0), 0) || 0;
+        // Calculate total overdue amount
+        const overdueAmount = overdueRent?.reduce((sum, record) => 
+          sum + (Number(record.amount_due) || 0) + (Number(record.late_fees) || 0), 0) || 0;
 
         setStats({
-          overdueRent: overdueRent?.length || 0,
+          overdueRentAmount: overdueAmount,
+          overdueTenantsCount: overdueRent?.length || 0,
           newRequests: newRequests?.length || 0,
           totalTenants: tenants?.length || 0,
-          totalRevenue,
+          leasesExpiringSoon,
         });
       } catch (error) {
         console.error("Error fetching dashboard stats:", error);
@@ -102,12 +110,27 @@ const Dashboard = () => {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Overdue Tenants</CardTitle>
+            <CardTitle className="text-sm font-medium">Overdue Rent</CardTitle>
+            <DollarSign className="h-4 w-4 text-destructive" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">${stats.overdueRentAmount.toLocaleString()}</div>
+            {stats.overdueTenantsCount > 0 && (
+              <Badge variant="destructive" className="mt-1">
+                {stats.overdueTenantsCount} tenants
+              </Badge>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Tenants Overdue</CardTitle>
             <AlertTriangle className="h-4 w-4 text-destructive" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.overdueRent}</div>
-            {stats.overdueRent > 0 && (
+            <div className="text-2xl font-bold">{stats.overdueTenantsCount}</div>
+            {stats.overdueTenantsCount > 0 && (
               <Badge variant="destructive" className="mt-1">Needs Attention</Badge>
             )}
           </CardContent>
@@ -115,7 +138,7 @@ const Dashboard = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">New Requests</CardTitle>
+            <CardTitle className="text-sm font-medium">New Maintenance</CardTitle>
             <Wrench className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
@@ -128,23 +151,15 @@ const Dashboard = () => {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Tenants</CardTitle>
+            <CardTitle className="text-sm font-medium">Leases Expiring</CardTitle>
             <Users className="h-4 w-4 text-primary" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{stats.totalTenants}</div>
-            <p className="text-xs text-muted-foreground mt-1">Active leases</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-primary" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">${stats.totalRevenue.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground mt-1">Collected rent</p>
+            <div className="text-2xl font-bold">{stats.leasesExpiringSoon}</div>
+            <p className="text-xs text-muted-foreground mt-1">Next 60 days</p>
+            {stats.leasesExpiringSoon > 0 && (
+              <Badge variant="secondary" className="mt-1">Review Soon</Badge>
+            )}
           </CardContent>
         </Card>
       </div>
@@ -181,8 +196,8 @@ const Dashboard = () => {
           <CardContent>
             <div className="space-y-4">
               <p className="text-sm text-muted-foreground">
-                {stats.overdueRent > 0 
-                  ? `${stats.overdueRent} tenants with overdue rent`
+                {stats.overdueTenantsCount > 0 
+                  ? `${stats.overdueTenantsCount} tenants with overdue rent`
                   : "All rent payments are current"
                 }
               </p>

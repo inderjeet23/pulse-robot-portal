@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { DollarSign, Calendar, AlertTriangle, Plus, TrendingUp } from "lucide-react";
+import { DollarSign, Calendar, AlertTriangle, Plus, TrendingUp, MoreHorizontal } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface RentRecord {
   id: string;
@@ -163,7 +165,7 @@ export const RentOverview = () => {
         </div>
         
         {/* Stats Overview */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mt-4">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-2 md:gap-4 mt-4">
           <div className="text-center">
             <div className="text-2xl font-bold text-primary">{stats.total}</div>
             <div className="text-sm text-muted-foreground">Total</div>
@@ -202,78 +204,98 @@ export const RentOverview = () => {
                 No rent records found for this status.
               </div>
             ) : (
-              <div className="space-y-4">
-                {filteredRecords.map((record) => (
-                  <div
-                    key={record.id}
-                    className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4" />
-                        <h3 className="font-medium">{record.tenants.name}</h3>
-                        <Badge className={statusColors[record.status] || "bg-secondary text-secondary-foreground"}>
-                          {record.status.charAt(0).toUpperCase() + record.status.slice(1)}
-                        </Badge>
-                      </div>
-                      <div className="flex gap-2">
-                        {record.status === 'pending' && (
-                          <Button
-                            size="sm"
-                            onClick={() => markAsPaid(record.id, record.amount_due)}
-                          >
-                            Mark Paid
-                          </Button>
-                        )}
-                        {record.status === 'overdue' && (
-                          <>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              className="text-destructive border-destructive"
-                            >
-                              Send Notice
-                            </Button>
-                            <Button
-                              size="sm"
-                              onClick={() => markAsPaid(record.id, record.amount_due)}
-                            >
-                              Mark Paid
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground mb-2">
-                      <div>
-                        <strong>Amount Due:</strong> ${record.amount_due.toLocaleString()}
-                      </div>
-                      <div>
-                        <strong>Due Date:</strong> {format(new Date(record.due_date), 'MMM d, yyyy')}
-                      </div>
-                      <div>
-                        <strong>Property:</strong> {record.tenants.property_address}
-                        {record.tenants.unit_number && ` - Unit ${record.tenants.unit_number}`}
-                      </div>
-                      <div>
-                        <strong>Amount Paid:</strong> ${record.amount_paid.toLocaleString()}
-                      </div>
-                    </div>
-
-                    {record.late_fees > 0 && (
-                      <div className="text-sm text-destructive">
-                        <strong>Late Fees:</strong> ${record.late_fees.toLocaleString()}
-                      </div>
-                    )}
-
-                    {record.paid_date && (
-                      <div className="text-sm text-accent">
-                        <strong>Paid Date:</strong> {format(new Date(record.paid_date), 'MMM d, yyyy')}
-                      </div>
-                    )}
-                  </div>
-                ))}
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Tenant</TableHead>
+                      <TableHead className="hidden md:table-cell">Property</TableHead>
+                      <TableHead>Amount Due</TableHead>
+                      <TableHead>Due Date</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="w-24">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredRecords.map((record) => (
+                      <TableRow key={record.id}>
+                        <TableCell className="font-medium">
+                          <div className="flex items-center gap-2">
+                            <DollarSign className="h-4 w-4" />
+                            <div>
+                              <div className="font-medium">{record.tenants.name}</div>
+                              <div className="text-sm text-muted-foreground md:hidden">
+                                {record.tenants.property_address}
+                                {record.tenants.unit_number && ` - Unit ${record.tenants.unit_number}`}
+                              </div>
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="hidden md:table-cell">
+                          <div className="text-sm">
+                            {record.tenants.property_address}
+                            {record.tenants.unit_number && (
+                              <div className="text-muted-foreground">Unit {record.tenants.unit_number}</div>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="font-medium">${record.amount_due.toLocaleString()}</div>
+                          {record.late_fees > 0 && (
+                            <div className="text-sm text-destructive">
+                              +${record.late_fees.toLocaleString()} late fees
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm">
+                            {format(new Date(record.due_date), 'MMM d, yyyy')}
+                          </div>
+                          {record.paid_date && (
+                            <div className="text-xs text-muted-foreground">
+                              Paid: {format(new Date(record.paid_date), 'MMM d')}
+                            </div>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          <Badge className={statusColors[record.status] || "bg-secondary text-secondary-foreground"}>
+                            {record.status.charAt(0).toUpperCase() + record.status.slice(1)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              {(record.status === 'pending' || record.status === 'overdue') && (
+                                <DropdownMenuItem
+                                  onClick={() => markAsPaid(record.id, record.amount_due)}
+                                >
+                                  Mark as Paid
+                                </DropdownMenuItem>
+                              )}
+                              {record.status === 'overdue' && (
+                                <DropdownMenuItem>Send Notice</DropdownMenuItem>
+                              )}
+                              <DropdownMenuItem>View Details</DropdownMenuItem>
+                              <DropdownMenuItem>Edit Record</DropdownMenuItem>
+                              {record.tenants.phone && (
+                                <DropdownMenuItem
+                                  onClick={() => window.open(`tel:${record.tenants.phone}`)}
+                                >
+                                  Call Tenant
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </div>
             )}
           </TabsContent>

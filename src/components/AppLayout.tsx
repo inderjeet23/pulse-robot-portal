@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Outlet, useLocation, NavLink } from "react-router-dom";
-import { LayoutDashboard, Wrench, DollarSign, Users, Settings } from "lucide-react";
+import { LayoutDashboard, Wrench, DollarSign, Users, Settings, HelpCircle } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -15,6 +15,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { Header } from "@/components/Header";
+import { BottomNav } from "@/components/BottomNav";
 
 const navigation = [
   {
@@ -42,6 +43,11 @@ const navigation = [
     url: "/setup",
     icon: Settings,
   },
+  {
+    title: "FAQ",
+    url: "/faq",
+    icon: HelpCircle,
+  },
 ];
 
 const pageTitles: Record<string, string> = {
@@ -50,6 +56,7 @@ const pageTitles: Record<string, string> = {
   "/rent": "Rent Management",
   "/tenants": "Tenant Management",
   "/setup": "Setup & Configuration",
+  "/faq": "FAQ & Support",
 };
 
 export function AppLayout() {
@@ -90,11 +97,12 @@ export function AppLayout() {
         
         <SidebarInset className="flex-1">
           <Header title={currentTitle} />
-          <main className="container mx-auto px-4 py-8 space-y-8 max-w-7xl">
+          <main className="container mx-auto px-4 py-8 space-y-8 max-w-7xl pb-20 md:pb-8">
             <Outlet />
           </main>
         </SidebarInset>
       </div>
+      <BottomNav />
     </SidebarProvider>
   );
 }

@@ -5,9 +5,11 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Wrench, Clock, CheckCircle, AlertCircle, Plus } from "lucide-react";
+import { Wrench, Clock, CheckCircle, AlertCircle, Plus, Phone, MoreHorizontal } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 interface MaintenanceRequest {
   id: string;
@@ -190,71 +192,116 @@ export const RequestsOverview = () => {
                 No requests found for this status.
               </div>
             ) : (
-              <div className="space-y-4">
-                {filteredRequests.map((request) => {
-                  const StatusIcon = statusIcons[request.status];
-                  return (
-                    <div
-                      key={request.id}
-                      className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
-                    >
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="flex items-center gap-2">
-                          <StatusIcon className="h-4 w-4" />
-                          <h3 className="font-medium">{request.title}</h3>
-                          <Badge className={priorityColors[request.priority] || "bg-secondary text-secondary-foreground"}>
-                            {request.priority}
-                          </Badge>
-                        </div>
-                        <div className="flex gap-2">
-                          {request.status === 'New' && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => updateRequestStatus(request.id, 'In Progress')}
-                            >
-                              Start
-                            </Button>
-                          )}
-                          {request.status === 'In Progress' && (
-                            <Button
-                              size="sm"
-                              onClick={() => updateRequestStatus(request.id, 'Completed')}
-                            >
-                              Complete
-                            </Button>
-                          )}
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground mb-2">
-                        <div>
-                          <strong>Tenant:</strong> {request.tenant_name}
-                        </div>
-                        <div>
-                          <strong>Property:</strong> {request.property_address}
-                          {request.unit_number && ` - Unit ${request.unit_number}`}
-                        </div>
-                        <div>
-                          <strong>Type:</strong> {request.request_type}
-                        </div>
-                        <div>
-                          <strong>Created:</strong> {format(new Date(request.created_at), 'MMM d, yyyy')}
-                        </div>
-                      </div>
-
-                      <p className="text-sm text-muted-foreground mb-2">
-                        {request.description}
-                      </p>
-
-                      {request.assigned_to && (
-                        <div className="text-sm">
-                          <strong>Assigned to:</strong> {request.assigned_to}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Title</TableHead>
+                      <TableHead>Tenant</TableHead>
+                      <TableHead className="hidden md:table-cell">Property</TableHead>
+                      <TableHead>Priority</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="hidden lg:table-cell">Created</TableHead>
+                      <TableHead className="w-24">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredRequests.map((request) => {
+                      const StatusIcon = statusIcons[request.status];
+                      return (
+                        <TableRow key={request.id}>
+                          <TableCell className="font-medium">
+                            <div className="flex items-center gap-2">
+                              <StatusIcon className="h-4 w-4" />
+                              <div>
+                                <div className="font-medium">{request.title}</div>
+                                <div className="text-sm text-muted-foreground md:hidden">
+                                  {request.property_address}
+                                  {request.unit_number && ` - Unit ${request.unit_number}`}
+                                </div>
+                              </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div>
+                              <div className="font-medium">{request.tenant_name}</div>
+                              <div className="text-sm text-muted-foreground">{request.request_type}</div>
+                            </div>
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            <div className="text-sm">
+                              {request.property_address}
+                              {request.unit_number && (
+                                <div className="text-muted-foreground">Unit {request.unit_number}</div>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={priorityColors[request.priority] || "bg-secondary text-secondary-foreground"}>
+                              {request.priority}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="outline">
+                              {request.status}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="hidden lg:table-cell text-sm text-muted-foreground">
+                            {format(new Date(request.created_at), 'MMM d, yyyy')}
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex gap-1">
+                              {/* Mobile quick call button */}
+                              {request.tenant_phone && (
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-8 w-8 md:hidden"
+                                  onClick={() => window.open(`tel:${request.tenant_phone}`)}
+                                >
+                                  <Phone className="h-4 w-4" />
+                                </Button>
+                              )}
+                              
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" size="icon" className="h-8 w-8">
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  {request.status === 'New' && (
+                                    <DropdownMenuItem
+                                      onClick={() => updateRequestStatus(request.id, 'In Progress')}
+                                    >
+                                      Start Work
+                                    </DropdownMenuItem>
+                                  )}
+                                  {request.status === 'In Progress' && (
+                                    <DropdownMenuItem
+                                      onClick={() => updateRequestStatus(request.id, 'Completed')}
+                                    >
+                                      Mark Complete
+                                    </DropdownMenuItem>
+                                  )}
+                                  <DropdownMenuItem>View Details</DropdownMenuItem>
+                                  <DropdownMenuItem>Update Status</DropdownMenuItem>
+                                  {request.tenant_phone && (
+                                    <DropdownMenuItem
+                                      onClick={() => window.open(`tel:${request.tenant_phone}`)}
+                                    >
+                                      Call Tenant
+                                    </DropdownMenuItem>
+                                  )}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
               </div>
             )}
           </TabsContent>
