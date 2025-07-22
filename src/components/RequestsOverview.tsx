@@ -10,6 +10,7 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { NewMaintenanceRequestDialog } from "./NewMaintenanceRequestDialog";
 
 interface MaintenanceRequest {
   id: string;
@@ -52,6 +53,7 @@ export const RequestsOverview = () => {
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
+  const [newRequestDialogOpen, setNewRequestDialogOpen] = useState(false);
 
   const fetchRequests = async () => {
     if (!propertyManager?.id) return;
@@ -150,7 +152,11 @@ export const RequestsOverview = () => {
               Track and manage property maintenance requests
             </CardDescription>
           </div>
-          <Button size="sm" className="flex items-center gap-2">
+          <Button 
+            size="sm" 
+            className="flex items-center gap-2"
+            onClick={() => setNewRequestDialogOpen(true)}
+          >
             <Plus className="h-4 w-4" />
             New Request
           </Button>
@@ -307,6 +313,12 @@ export const RequestsOverview = () => {
           </TabsContent>
         </Tabs>
       </CardContent>
+      
+      <NewMaintenanceRequestDialog
+        open={newRequestDialogOpen}
+        onOpenChange={setNewRequestDialogOpen}
+        onSuccess={fetchRequests}
+      />
     </Card>
   );
 };
