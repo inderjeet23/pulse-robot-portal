@@ -6,11 +6,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Wrench, Clock, CheckCircle, AlertCircle, Plus, Phone, MoreHorizontal } from "lucide-react";
-import { format } from "date-fns";
+import { format, differenceInDays } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { NewMaintenanceRequestDialog } from "./NewMaintenanceRequestDialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { AlertTriangle } from "lucide-react";
 
 interface MaintenanceRequest {
   id: string;
@@ -47,13 +49,25 @@ const statusIcons: Record<string, any> = {
   Cancelled: AlertCircle
 };
 
-export const RequestsOverview = () => {
+interface RequestsOverviewProps {
+  newRequestDialogOpen?: boolean;
+  setNewRequestDialogOpen?: (open: boolean) => void;
+}
+
+export const RequestsOverview = ({ 
+  newRequestDialogOpen: externalNewRequestDialogOpen,
+  setNewRequestDialogOpen: externalSetNewRequestDialogOpen 
+}: RequestsOverviewProps = {}) => {
   const { propertyManager } = useAuth();
   const { toast } = useToast();
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
-  const [newRequestDialogOpen, setNewRequestDialogOpen] = useState(false);
+  const [internalNewRequestDialogOpen, setInternalNewRequestDialogOpen] = useState(false);
+
+  // Use external state if provided, otherwise use internal state
+  const newRequestDialogOpen = externalNewRequestDialogOpen ?? internalNewRequestDialogOpen;
+  const setNewRequestDialogOpen = externalSetNewRequestDialogOpen ?? setInternalNewRequestDialogOpen;
 
   const fetchRequests = async () => {
     if (!propertyManager?.id) return;
@@ -214,13 +228,31 @@ export const RequestsOverview = () => {
                   <TableBody>
                     {filteredRequests.map((request) => {
                       const StatusIcon = statusIcons[request.status];
+                      const isOverdue = request.status === 'In Progress' && 
+                        differenceInDays(new Date(), new Date(request.updated_at)) > 7;
+                      
                       return (
-                        <TableRow key={request.id}>
+                        <TableRow 
+                          key={request.id}
+                          className={isOverdue ? "bg-yellow-50 dark:bg-yellow-900/10" : ""}
+                        >
                           <TableCell className="font-medium">
                             <div className="flex items-center gap-2">
                               <StatusIcon className="h-4 w-4" />
                               <div>
-                                <div className="font-medium">{request.title}</div>
+                                <div className="font-medium flex items-center gap-2">
+                                  {request.title}
+                                  {isOverdue && (
+                                    <Tooltip>
+                                      <TooltipTrigger>
+                                        <AlertTriangle className="h-4 w-4 text-yellow-600" />
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>This request has been in progress for {differenceInDays(new Date(), new Date(request.updated_at))} days</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  )}
+                                </div>
                                 <div className="text-sm text-muted-foreground md:hidden">
                                   {request.property_address}
                                   {request.unit_number && ` - Unit ${request.unit_number}`}

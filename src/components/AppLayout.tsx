@@ -16,6 +16,8 @@ import {
 } from "@/components/ui/sidebar";
 import { Header } from "@/components/Header";
 import { BottomNav } from "@/components/BottomNav";
+import { GlobalCommandPalette } from "./GlobalCommandPalette";
+import { useCommandPalette } from "@/hooks/useCommandPalette";
 
 const navigation = [
   {
@@ -62,6 +64,12 @@ const pageTitles: Record<string, string> = {
 export function AppLayout() {
   const location = useLocation();
   const currentTitle = pageTitles[location.pathname] || "Dashboard";
+  const { open, setOpen } = useCommandPalette();
+  const [newMaintenanceRequestOpen, setNewMaintenanceRequestOpen] = useState(false);
+
+  const handleNewMaintenanceRequest = () => {
+    setNewMaintenanceRequestOpen(true);
+  };
 
   return (
     <SidebarProvider>
@@ -98,11 +106,16 @@ export function AppLayout() {
         <SidebarInset className="flex-1">
           <Header title={currentTitle} />
           <main className="container mx-auto px-4 py-8 space-y-8 max-w-7xl pb-20 md:pb-8">
-            <Outlet />
+            <Outlet context={{ newMaintenanceRequestOpen, setNewMaintenanceRequestOpen }} />
           </main>
         </SidebarInset>
       </div>
       <BottomNav />
+      <GlobalCommandPalette 
+        open={open} 
+        onOpenChange={setOpen}
+        onNewMaintenanceRequest={handleNewMaintenanceRequest}
+      />
     </SidebarProvider>
   );
 }
