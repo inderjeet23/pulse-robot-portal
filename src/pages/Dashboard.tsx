@@ -1,5 +1,7 @@
 import { StatusCard } from "@/components/StatusCard";
 import { MetricCard } from "@/components/MetricCard";
+import { CompactKPI } from "@/components/CompactKPI";
+import { ActionItem } from "@/components/ActionItem";
 import { OnboardingChecklist } from "@/components/OnboardingChecklist";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -165,6 +167,52 @@ const Dashboard = () => {
   // Show onboarding checklist for new users
   const showOnboardingChecklist = propertyManager && !propertyManager.has_completed_onboarding;
 
+  // Generate priority action items for mobile
+  const getActionItems = () => {
+    const items = [];
+    
+    if (stats.overdueTenantsCount > 0) {
+      items.push({
+        title: "Overdue Rent Payments",
+        description: `${stats.overdueTenantsCount} tenant${stats.overdueTenantsCount > 1 ? 's' : ''} behind on rent`,
+        icon: DollarSign,
+        priority: "critical" as const,
+        actionLabel: "Send Reminder",
+        onAction: () => navigate("/rent"),
+        value: `$${stats.overdueRentAmount.toLocaleString()}`,
+        badge: `${stats.overdueTenantsCount} tenants`
+      });
+    }
+    
+    if (stats.newRequests > 0) {
+      items.push({
+        title: "New Maintenance Requests",
+        description: "Requests need review and assignment",
+        icon: Wrench,
+        priority: stats.newRequests > 5 ? "critical" as const : stats.newRequests > 2 ? "high" as const : "medium" as const,
+        actionLabel: "Review",
+        onAction: () => navigate("/maintenance"),
+        badge: `${stats.newRequests} new`
+      });
+    }
+    
+    if (stats.leasesExpiringSoon > 0) {
+      items.push({
+        title: "Lease Renewals Due",
+        description: "Leases expiring in next 60 days",
+        icon: Calendar,
+        priority: stats.leasesExpiringSoon > 3 ? "high" as const : "medium" as const,
+        actionLabel: "Contact",
+        onAction: () => navigate("/tenants"),
+        badge: `${stats.leasesExpiringSoon} expiring`
+      });
+    }
+    
+    return items;
+  };
+
+  const actionItems = getActionItems();
+
   return (
     <div className="space-y-6">
       {showOnboardingChecklist ? (
@@ -176,6 +224,91 @@ const Dashboard = () => {
         <StatusCard />
       )}
 
+      {/* Mobile KPI Grid - only visible on mobile */}
+      <div className="block md:hidden">
+        <div className="grid grid-cols-2 gap-3 mb-6">
+          <CompactKPI
+            label="Overdue Rent"
+            value={`$${stats.overdueRentAmount.toLocaleString()}`}
+            icon={DollarSign}
+            status={stats.overdueTenantsCount > 0 ? "critical" : "success"}
+            trend={{ direction: 'down', percentage: 12 }}
+            loading={loading}
+            onClick={() => navigate("/rent")}
+          />
+          <CompactKPI
+            label="New Requests"
+            value={stats.newRequests}
+            icon={Wrench}
+            status={stats.newRequests > 5 ? "critical" : stats.newRequests > 0 ? "warning" : "success"}
+            trend={{ direction: 'up', percentage: 8 }}
+            loading={loading}
+            onClick={() => navigate("/maintenance")}
+          />
+          <CompactKPI
+            label="Leases Expiring"
+            value={stats.leasesExpiringSoon}
+            icon={AlertTriangle}
+            status={stats.leasesExpiringSoon > 2 ? "warning" : "success"}
+            trend={{ direction: 'down', percentage: 5 }}
+            loading={loading}
+            onClick={() => navigate("/tenants")}
+          />
+          <CompactKPI
+            label="Total Tenants"
+            value={stats.totalTenants}
+            icon={Users}
+            status="neutral"
+            trend={{ direction: 'up', percentage: 2 }}
+            loading={loading}
+            onClick={() => navigate("/tenants")}
+          />
+        </div>
+
+        {/* Mobile Action Items */}
+        {actionItems.length > 0 && (
+          <Card className="mb-6">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg font-semibold flex items-center gap-2">
+                <AlertTriangle className="w-5 h-5 text-red-500" />
+                Priority Actions
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="pt-0">
+              <div className="space-y-3">
+                {actionItems.map((item, index) => (
+                  <ActionItem key={index} {...item} />
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Mobile Quick Actions - Compact Grid */}
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg font-semibold">Quick Actions</CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="grid grid-cols-2 gap-3">
+              {quickActions.slice(0, 4).map((action, index) => (
+                <Button
+                  key={index}
+                  variant="outline"
+                  className="h-16 flex flex-col items-center justify-center space-y-1 text-xs"
+                  onClick={action.action}
+                >
+                  <action.icon className="w-4 h-4" />
+                  <span className="font-medium leading-none">{action.title}</span>
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Desktop Layout - hidden on mobile */}
+      <div className="hidden md:block space-y-6">
         {/* Primary Metrics Grid - 2 rows, 3 columns */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <MetricCard
@@ -263,6 +396,7 @@ const Dashboard = () => {
             </div>
           </CardContent>
         </Card>
+      </div>
 
         {/* Recent Activity Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
