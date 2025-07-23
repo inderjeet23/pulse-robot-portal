@@ -149,12 +149,40 @@ export type Database = {
         }
         Relationships: []
       }
+      properties: {
+        Row: {
+          address: string
+          created_at: string
+          id: string
+          name: string | null
+          property_manager_id: string
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          id?: string
+          name?: string | null
+          property_manager_id: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          id?: string
+          name?: string | null
+          property_manager_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       property_managers: {
         Row: {
           bot_id: string
           brand_color: string
           created_at: string
           email: string
+          has_completed_onboarding: boolean
           hosted_link: string
           id: string
           logo_url: string | null
@@ -168,6 +196,7 @@ export type Database = {
           brand_color?: string
           created_at?: string
           email: string
+          has_completed_onboarding?: boolean
           hosted_link: string
           id?: string
           logo_url?: string | null
@@ -181,6 +210,7 @@ export type Database = {
           brand_color?: string
           created_at?: string
           email?: string
+          has_completed_onboarding?: boolean
           hosted_link?: string
           id?: string
           logo_url?: string | null
@@ -354,6 +384,50 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      vendors: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          name: string
+          on_call_hours: string | null
+          phone: string | null
+          property_manager_id: string
+          specialty: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          name: string
+          on_call_hours?: string | null
+          phone?: string | null
+          property_manager_id: string
+          specialty: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          name?: string
+          on_call_hours?: string | null
+          phone?: string | null
+          property_manager_id?: string
+          specialty?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vendors_property_manager_id_fkey"
+            columns: ["property_manager_id"]
+            isOneToOne: false
+            referencedRelation: "property_managers"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

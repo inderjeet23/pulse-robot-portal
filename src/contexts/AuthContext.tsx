@@ -15,6 +15,7 @@ interface PropertyManager {
   hosted_link: string;
   created_at: string;
   updated_at: string;
+  has_completed_onboarding: boolean;
 }
 
 interface AuthContextType {

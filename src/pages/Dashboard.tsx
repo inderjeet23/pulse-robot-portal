@@ -1,5 +1,6 @@
 import { StatusCard } from "@/components/StatusCard";
 import { MetricCard } from "@/components/MetricCard";
+import { OnboardingChecklist } from "@/components/OnboardingChecklist";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +22,8 @@ interface DashboardStats {
   totalProperties: number;
   occupancyRate: number;
   avgResponseTime: number;
+  hasProperties: boolean;
+  hasTenants: boolean;
 }
 
 interface QuickAction {
@@ -43,6 +46,8 @@ const Dashboard = () => {
     totalProperties: 0,
     occupancyRate: 95,
     avgResponseTime: 2.3,
+    hasProperties: false,
+    hasTenants: false,
   });
   const [loading, setLoading] = useState(true);
   const [addTenantOpen, setAddTenantOpen] = useState(false);
@@ -73,6 +78,12 @@ const Dashboard = () => {
         .select("id, lease_end_date, property_address")
         .eq("property_manager_id", propertyManager.id);
 
+      // Fetch properties
+      const { data: properties } = await supabase
+        .from("properties")
+        .select("id")
+        .eq("property_manager_id", propertyManager.id);
+
       // Calculate leases expiring in next 60 days
       const today = new Date();
       const sixtyDaysFromNow = new Date();
@@ -100,6 +111,8 @@ const Dashboard = () => {
         totalProperties: uniqueProperties,
         occupancyRate: 95,
         avgResponseTime: 2.3,
+        hasProperties: (properties?.length || 0) > 0,
+        hasTenants: (tenants?.length || 0) > 0,
       });
     } catch (error) {
       console.error("Error fetching dashboard stats:", error);
@@ -149,10 +162,19 @@ const Dashboard = () => {
     },
   ];
 
+  // Show onboarding checklist for new users
+  const showOnboardingChecklist = propertyManager && !propertyManager.has_completed_onboarding;
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="space-y-6">
+      {showOnboardingChecklist ? (
+        <OnboardingChecklist 
+          hasProperties={stats.hasProperties}
+          hasTenants={stats.hasTenants}
+        />
+      ) : (
         <StatusCard />
+      )}
 
         {/* Primary Metrics Grid - 2 rows, 3 columns */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -368,7 +390,6 @@ const Dashboard = () => {
           onOpenChange={setNewMaintenanceOpen}
           onSuccess={refreshData}
         />
-      </div>
     </div>
   );
 };
