@@ -25,8 +25,8 @@ const statusColors = {
 
 const statusIndicators = {
   success: 'bg-success',
-  warning: 'bg-warning animate-pulse-error',
-  error: 'bg-error animate-pulse-error',
+  warning: 'bg-warning',
+  error: 'bg-error',
   neutral: 'bg-neutral'
 };
 
