@@ -16,7 +16,6 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-
 interface RentRecord {
   id: string;
   tenant_id: string;
@@ -36,7 +35,6 @@ interface RentRecord {
     unit_number: string | null;
   };
 }
-
 interface Tenant {
   id: string;
   name: string;
@@ -46,17 +44,19 @@ interface Tenant {
   unit_number: string | null;
   rent_amount: number;
 }
-
 const statusColors: Record<string, string> = {
   pending: "bg-secondary text-secondary-foreground",
   partial: "bg-primary/20 text-primary",
   paid: "bg-accent text-accent-foreground",
   overdue: "bg-destructive/20 text-destructive"
 };
-
 export const RentOverview = () => {
-  const { propertyManager } = useAuth();
-  const { toast } = useToast();
+  const {
+    propertyManager
+  } = useAuth();
+  const {
+    toast
+  } = useToast();
   const [rentRecords, setRentRecords] = useState<RentRecord[]>([]);
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -70,14 +70,13 @@ export const RentOverview = () => {
     payment_method: "cash",
     notes: ""
   });
-
   const fetchRentRecords = async () => {
     if (!propertyManager?.id) return;
-
     try {
-      const { data, error } = await supabase
-        .from('rent_records')
-        .select(`
+      const {
+        data,
+        error
+      } = await supabase.from('rent_records').select(`
           *,
           tenants (
             name,
@@ -86,10 +85,9 @@ export const RentOverview = () => {
             property_address,
             unit_number
           )
-        `)
-        .eq('property_manager_id', propertyManager.id)
-        .order('due_date', { ascending: false });
-
+        `).eq('property_manager_id', propertyManager.id).order('due_date', {
+        ascending: false
+      });
       if (error) throw error;
       setRentRecords(data || []);
     } catch (error) {
@@ -103,46 +101,37 @@ export const RentOverview = () => {
       setLoading(false);
     }
   };
-
   const fetchTenants = async () => {
     if (!propertyManager?.id) return;
-
     try {
-      const { data, error } = await supabase
-        .from('tenants')
-        .select('id, name, email, phone, property_address, unit_number, rent_amount')
-        .eq('property_manager_id', propertyManager.id)
-        .order('name');
-
+      const {
+        data,
+        error
+      } = await supabase.from('tenants').select('id, name, email, phone, property_address, unit_number, rent_amount').eq('property_manager_id', propertyManager.id).order('name');
       if (error) throw error;
       setTenants(data || []);
     } catch (error) {
       console.error('Error fetching tenants:', error);
     }
   };
-
   useEffect(() => {
     fetchRentRecords();
     fetchTenants();
   }, [propertyManager?.id]);
-
   const markAsPaid = async (recordId: string, amountDue: number) => {
     try {
-      const { error } = await supabase
-        .from('rent_records')
-        .update({ 
-          status: 'paid',
-          amount_paid: amountDue,
-          paid_date: new Date().toISOString().split('T')[0]
-        })
-        .eq('id', recordId);
-
+      const {
+        error
+      } = await supabase.from('rent_records').update({
+        status: 'paid',
+        amount_paid: amountDue,
+        paid_date: new Date().toISOString().split('T')[0]
+      }).eq('id', recordId);
       if (error) throw error;
-
       await fetchRentRecords();
       toast({
         title: "Success",
-        description: "Rent marked as paid",
+        description: "Rent marked as paid"
       });
     } catch (error) {
       console.error('Error marking rent as paid:', error);
@@ -153,7 +142,6 @@ export const RentOverview = () => {
       });
     }
   };
-
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
       setSelectedRecords(new Set(filteredRecords.map(r => r.id)));
@@ -161,7 +149,6 @@ export const RentOverview = () => {
       setSelectedRecords(new Set());
     }
   };
-
   const handleSelectRecord = (recordId: string, checked: boolean) => {
     const newSelected = new Set(selectedRecords);
     if (checked) {
@@ -171,16 +158,14 @@ export const RentOverview = () => {
     }
     setSelectedRecords(newSelected);
   };
-
   const handleBulkReminder = async () => {
     // TODO: Implement bulk reminder functionality
     toast({
       title: "Reminders Sent",
-      description: `Sent reminders to ${selectedRecords.size} tenants`,
+      description: `Sent reminders to ${selectedRecords.size} tenants`
     });
     setSelectedRecords(new Set());
   };
-
   const handleLogPayment = async () => {
     if (!propertyManager?.id || !paymentFormData.tenant_id || !paymentFormData.amount) {
       toast({
@@ -190,59 +175,48 @@ export const RentOverview = () => {
       });
       return;
     }
-
     try {
       // Find the most recent pending/overdue record for this tenant
-      const { data: existingRecord, error: findError } = await supabase
-        .from('rent_records')
-        .select('*')
-        .eq('tenant_id', paymentFormData.tenant_id)
-        .eq('property_manager_id', propertyManager.id)
-        .in('status', ['pending', 'overdue'])
-        .order('due_date', { ascending: false })
-        .limit(1);
-
+      const {
+        data: existingRecord,
+        error: findError
+      } = await supabase.from('rent_records').select('*').eq('tenant_id', paymentFormData.tenant_id).eq('property_manager_id', propertyManager.id).in('status', ['pending', 'overdue']).order('due_date', {
+        ascending: false
+      }).limit(1);
       if (findError) throw findError;
-
       const paymentAmount = parseFloat(paymentFormData.amount);
-
       if (existingRecord && existingRecord.length > 0) {
         // Update existing record
         const record = existingRecord[0];
-        const { error } = await supabase
-          .from('rent_records')
-          .update({
-            status: 'paid',
-            amount_paid: paymentAmount,
-            paid_date: paymentFormData.payment_date,
-            payment_method: paymentFormData.payment_method,
-            notes: paymentFormData.notes || null
-          })
-          .eq('id', record.id);
-
+        const {
+          error
+        } = await supabase.from('rent_records').update({
+          status: 'paid',
+          amount_paid: paymentAmount,
+          paid_date: paymentFormData.payment_date,
+          payment_method: paymentFormData.payment_method,
+          notes: paymentFormData.notes || null
+        }).eq('id', record.id);
         if (error) throw error;
       } else {
         // Create new record if no pending record exists
         const selectedTenant = tenants.find(t => t.id === paymentFormData.tenant_id);
         if (!selectedTenant) throw new Error("Tenant not found");
-
-        const { error } = await supabase
-          .from('rent_records')
-          .insert({
-            property_manager_id: propertyManager.id,
-            tenant_id: paymentFormData.tenant_id,
-            amount_due: paymentAmount,
-            amount_paid: paymentAmount,
-            due_date: paymentFormData.payment_date,
-            paid_date: paymentFormData.payment_date,
-            status: 'paid',
-            payment_method: paymentFormData.payment_method,
-            notes: paymentFormData.notes || null
-          });
-
+        const {
+          error
+        } = await supabase.from('rent_records').insert({
+          property_manager_id: propertyManager.id,
+          tenant_id: paymentFormData.tenant_id,
+          amount_due: paymentAmount,
+          amount_paid: paymentAmount,
+          due_date: paymentFormData.payment_date,
+          paid_date: paymentFormData.payment_date,
+          status: 'paid',
+          payment_method: paymentFormData.payment_method,
+          notes: paymentFormData.notes || null
+        });
         if (error) throw error;
       }
-
       await fetchRentRecords();
       setIsPaymentDialogOpen(false);
       setPaymentFormData({
@@ -252,10 +226,9 @@ export const RentOverview = () => {
         payment_method: "cash",
         notes: ""
       });
-
       toast({
         title: "Success",
-        description: "Payment logged successfully",
+        description: "Payment logged successfully"
       });
     } catch (error) {
       console.error('Error logging payment:', error);
@@ -266,7 +239,6 @@ export const RentOverview = () => {
       });
     }
   };
-
   const filteredRecords = rentRecords.filter(record => {
     if (activeTab === "all") return true;
     return record.status === activeTab;
@@ -275,25 +247,17 @@ export const RentOverview = () => {
   // Calculate financial KPIs
   const currentMonth = new Date().getMonth();
   const currentYear = new Date().getFullYear();
-  
   const thisMonthRecords = rentRecords.filter(record => {
     const recordDate = new Date(record.due_date);
     return recordDate.getMonth() === currentMonth && recordDate.getFullYear() === currentYear;
   });
-
   const kpis = {
     totalDueThisMonth: thisMonthRecords.reduce((sum, r) => sum + r.amount_due, 0),
-    totalCollectedThisMonth: thisMonthRecords
-      .filter(r => r.status === 'paid')
-      .reduce((sum, r) => sum + r.amount_paid, 0),
-    totalOverdueAllTime: rentRecords
-      .filter(r => r.status === 'overdue')
-      .reduce((sum, r) => sum + (r.amount_due - r.amount_paid), 0),
+    totalCollectedThisMonth: thisMonthRecords.filter(r => r.status === 'paid').reduce((sum, r) => sum + r.amount_paid, 0),
+    totalOverdueAllTime: rentRecords.filter(r => r.status === 'overdue').reduce((sum, r) => sum + (r.amount_due - r.amount_paid), 0)
   };
-
   if (loading) {
-    return (
-      <Card>
+    return <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <DollarSign className="h-5 w-5" />
@@ -302,17 +266,12 @@ export const RentOverview = () => {
         </CardHeader>
         <CardContent>
           <div className="animate-pulse space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-20 bg-muted rounded-md"></div>
-            ))}
+            {[1, 2, 3].map(i => <div key={i} className="h-20 bg-muted rounded-md"></div>)}
           </div>
         </CardContent>
-      </Card>
-    );
+      </Card>;
   }
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       {/* Financial KPIs */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="border-primary/20">
@@ -383,49 +342,43 @@ export const RentOverview = () => {
                   <div className="space-y-4">
                     <div>
                       <Label htmlFor="tenant">Tenant *</Label>
-                      <Select value={paymentFormData.tenant_id} onValueChange={(value) => 
-                        setPaymentFormData({...paymentFormData, tenant_id: value})
-                      }>
+                      <Select value={paymentFormData.tenant_id} onValueChange={value => setPaymentFormData({
+                      ...paymentFormData,
+                      tenant_id: value
+                    })}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select a tenant" />
                         </SelectTrigger>
                         <SelectContent>
-                          {tenants.map((tenant) => (
-                            <SelectItem key={tenant.id} value={tenant.id}>
+                          {tenants.map(tenant => <SelectItem key={tenant.id} value={tenant.id}>
                               {tenant.name} - {tenant.property_address}
                               {tenant.unit_number && ` (Unit ${tenant.unit_number})`}
-                            </SelectItem>
-                          ))}
+                            </SelectItem>)}
                         </SelectContent>
                       </Select>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label htmlFor="amount">Amount *</Label>
-                        <Input
-                          id="amount"
-                          type="number"
-                          step="0.01"
-                          placeholder="0.00"
-                          value={paymentFormData.amount}
-                          onChange={(e) => setPaymentFormData({...paymentFormData, amount: e.target.value})}
-                        />
+                        <Input id="amount" type="number" step="0.01" placeholder="0.00" value={paymentFormData.amount} onChange={e => setPaymentFormData({
+                        ...paymentFormData,
+                        amount: e.target.value
+                      })} />
                       </div>
                       <div>
                         <Label htmlFor="payment_date">Payment Date *</Label>
-                        <Input
-                          id="payment_date"
-                          type="date"
-                          value={paymentFormData.payment_date}
-                          onChange={(e) => setPaymentFormData({...paymentFormData, payment_date: e.target.value})}
-                        />
+                        <Input id="payment_date" type="date" value={paymentFormData.payment_date} onChange={e => setPaymentFormData({
+                        ...paymentFormData,
+                        payment_date: e.target.value
+                      })} />
                       </div>
                     </div>
                     <div>
                       <Label htmlFor="payment_method">Payment Method</Label>
-                      <Select value={paymentFormData.payment_method} onValueChange={(value) => 
-                        setPaymentFormData({...paymentFormData, payment_method: value})
-                      }>
+                      <Select value={paymentFormData.payment_method} onValueChange={value => setPaymentFormData({
+                      ...paymentFormData,
+                      payment_method: value
+                    })}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -440,13 +393,10 @@ export const RentOverview = () => {
                     </div>
                     <div>
                       <Label htmlFor="notes">Notes</Label>
-                      <Textarea
-                        id="notes"
-                        placeholder="Additional notes about this payment..."
-                        value={paymentFormData.notes}
-                        onChange={(e) => setPaymentFormData({...paymentFormData, notes: e.target.value})}
-                        rows={2}
-                      />
+                      <Textarea id="notes" placeholder="Additional notes about this payment..." value={paymentFormData.notes} onChange={e => setPaymentFormData({
+                      ...paymentFormData,
+                      notes: e.target.value
+                    })} rows={2} />
                     </div>
                     <div className="flex justify-end gap-2">
                       <Button variant="outline" onClick={() => setIsPaymentDialogOpen(false)}>
@@ -459,16 +409,12 @@ export const RentOverview = () => {
                   </div>
                 </DialogContent>
               </Dialog>
-              <Button size="sm" className="flex items-center gap-2">
-                <Users className="h-4 w-4" />
-                Add Tenant
-              </Button>
+              
             </div>
           </div>
 
           {/* Bulk Actions Bar */}
-          {selectedRecords.size > 0 && (
-            <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 mt-4 animate-fade-in">
+          {selectedRecords.size > 0 && <div className="bg-primary/10 border border-primary/20 rounded-lg p-4 mt-4 animate-fade-in">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium">
@@ -486,8 +432,7 @@ export const RentOverview = () => {
                   </Button>
                 </div>
               </div>
-            </div>
-          )}
+            </div>}
         </CardHeader>
 
       <CardContent>
@@ -500,21 +445,14 @@ export const RentOverview = () => {
           </TabsList>
 
           <TabsContent value={activeTab} className="mt-6">
-            {filteredRecords.length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
+            {filteredRecords.length === 0 ? <div className="text-center py-8 text-muted-foreground">
                 No rent records found for this status.
-              </div>
-            ) : (
-              <div className="rounded-md border">
+              </div> : <div className="rounded-md border">
                 <Table>
                   <TableHeader>
                     <TableRow>
                       <TableHead className="w-12">
-                        <Checkbox
-                          checked={selectedRecords.size === filteredRecords.length && filteredRecords.length > 0}
-                          onCheckedChange={handleSelectAll}
-                          aria-label="Select all"
-                        />
+                        <Checkbox checked={selectedRecords.size === filteredRecords.length && filteredRecords.length > 0} onCheckedChange={handleSelectAll} aria-label="Select all" />
                       </TableHead>
                       <TableHead>Tenant</TableHead>
                       <TableHead className="hidden md:table-cell">Property</TableHead>
@@ -525,14 +463,9 @@ export const RentOverview = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredRecords.map((record) => (
-                      <TableRow key={record.id}>
+                    {filteredRecords.map(record => <TableRow key={record.id}>
                         <TableCell>
-                          <Checkbox
-                            checked={selectedRecords.has(record.id)}
-                            onCheckedChange={(checked) => handleSelectRecord(record.id, checked as boolean)}
-                            aria-label={`Select ${record.tenants.name}`}
-                          />
+                          <Checkbox checked={selectedRecords.has(record.id)} onCheckedChange={checked => handleSelectRecord(record.id, checked as boolean)} aria-label={`Select ${record.tenants.name}`} />
                         </TableCell>
                         <TableCell className="font-medium">
                           <div className="flex items-center gap-2">
@@ -549,28 +482,22 @@ export const RentOverview = () => {
                         <TableCell className="hidden md:table-cell">
                           <div className="text-sm">
                             {record.tenants.property_address}
-                            {record.tenants.unit_number && (
-                              <div className="text-muted-foreground">Unit {record.tenants.unit_number}</div>
-                            )}
+                            {record.tenants.unit_number && <div className="text-muted-foreground">Unit {record.tenants.unit_number}</div>}
                           </div>
                         </TableCell>
                         <TableCell>
                           <div className="font-medium">${record.amount_due.toLocaleString()}</div>
-                          {record.late_fees > 0 && (
-                            <div className="text-sm text-destructive">
+                          {record.late_fees > 0 && <div className="text-sm text-destructive">
                               +${record.late_fees.toLocaleString()} late fees
-                            </div>
-                          )}
+                            </div>}
                         </TableCell>
                         <TableCell>
                           <div className="text-sm">
                             {format(new Date(record.due_date), 'MMM d, yyyy')}
                           </div>
-                          {record.paid_date && (
-                            <div className="text-xs text-muted-foreground">
+                          {record.paid_date && <div className="text-xs text-muted-foreground">
                               Paid: {format(new Date(record.paid_date), 'MMM d')}
-                            </div>
-                          )}
+                            </div>}
                         </TableCell>
                         <TableCell>
                           <Badge className={statusColors[record.status] || "bg-secondary text-secondary-foreground"}>
@@ -585,38 +512,25 @@ export const RentOverview = () => {
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              {(record.status === 'pending' || record.status === 'overdue') && (
-                                <DropdownMenuItem
-                                  onClick={() => markAsPaid(record.id, record.amount_due)}
-                                >
+                              {(record.status === 'pending' || record.status === 'overdue') && <DropdownMenuItem onClick={() => markAsPaid(record.id, record.amount_due)}>
                                   Mark as Paid
-                                </DropdownMenuItem>
-                              )}
-                              {record.status === 'overdue' && (
-                                <DropdownMenuItem>Send Notice</DropdownMenuItem>
-                              )}
+                                </DropdownMenuItem>}
+                              {record.status === 'overdue' && <DropdownMenuItem>Send Notice</DropdownMenuItem>}
                               <DropdownMenuItem>View Details</DropdownMenuItem>
                               <DropdownMenuItem>Edit Record</DropdownMenuItem>
-                              {record.tenants.phone && (
-                                <DropdownMenuItem
-                                  onClick={() => window.open(`tel:${record.tenants.phone}`)}
-                                >
+                              {record.tenants.phone && <DropdownMenuItem onClick={() => window.open(`tel:${record.tenants.phone}`)}>
                                   Call Tenant
-                                </DropdownMenuItem>
-                              )}
+                                </DropdownMenuItem>}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>
-                      </TableRow>
-                    ))}
+                      </TableRow>)}
                   </TableBody>
                 </Table>
-              </div>
-            )}
+              </div>}
           </TabsContent>
         </Tabs>
       </CardContent>
     </Card>
-    </div>
-  );
+    </div>;
 };
