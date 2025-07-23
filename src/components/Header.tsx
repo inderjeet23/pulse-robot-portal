@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Command, CommandDialog, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -19,7 +18,6 @@ export const Header = ({ title }: HeaderProps) => {
     <>
       <header className="bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50 w-full border-b border-border/40">
         <div className="flex h-14 items-center px-4">
-          <SidebarTrigger className="mr-4" />
           <div className="flex flex-1 items-center justify-between">
             <h1 className="text-lg font-semibold">{title}</h1>
             <div className="flex items-center gap-2">
