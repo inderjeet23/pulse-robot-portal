@@ -8,50 +8,57 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Pulse Robot Design System */
-    --background: 30 100% 97%;
-    --foreground: 220 15% 25%;
+    /* Modern AI Product Design System */
+    --background: 220 13% 97%;
+    --foreground: 220 9% 15%;
 
     --card: 0 0% 100%;
-    --card-foreground: 220 15% 25%;
+    --card-foreground: 220 9% 15%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 220 15% 25%;
+    --popover-foreground: 220 9% 15%;
 
-    /* Primary Orange Palette */
-    --primary: 25 95% 53%;
-    --primary-foreground: 0 0% 100%;
-    --primary-light: 35 100% 65%;
-    --primary-glow: 25 95% 70%;
+    /* Modern AI Color Palette */
+    --primary: 214 88% 52%; /* #2563eb */
+    --primary-foreground: 0 0% 98%;
+    --success: 160 84% 39%; /* #059669 */
+    --success-foreground: 0 0% 98%;
+    --warning: 32 95% 44%; /* #d97706 */
+    --warning-foreground: 0 0% 98%;
+    --error: 0 72% 51%; /* #dc2626 */
+    --error-foreground: 0 0% 98%;
+    --neutral: 220 9% 46%; /* #6b7280 */
+    --neutral-foreground: 0 0% 98%;
 
-    /* Secondary Grays */
-    --secondary: 220 15% 96%;
-    --secondary-foreground: 220 15% 25%;
+    /* Secondary System */
+    --secondary: 220 13% 91%;
+    --secondary-foreground: 220 9% 15%;
 
-    --muted: 220 10% 95%;
-    --muted-foreground: 220 10% 55%;
+    --muted: 220 13% 91%;
+    --muted-foreground: 220 9% 46%;
 
-    --accent: 25 85% 90%;
-    --accent-foreground: 220 15% 25%;
+    --accent: 220 13% 91%;
+    --accent-foreground: 220 9% 15%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
 
-    --border: 220 15% 90%;
-    --input: 220 15% 95%;
-    --ring: 25 95% 53%;
+    --border: 220 13% 89%;
+    --input: 220 13% 89%;
+    --ring: 214 88% 52%;
 
-    /* Gradients */
-    --gradient-primary: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary-light)) 100%);
-    --gradient-hero: linear-gradient(135deg, hsl(25 95% 53%) 0%, hsl(35 100% 70%) 50%, hsl(45 100% 85%) 100%);
-    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(25 50% 98%) 100%);
+    /* Modern Gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(214 88% 52%) 0%, hsl(214 88% 60%) 100%);
+    --gradient-hero: linear-gradient(135deg, hsl(214 88% 52%) 0%, hsl(214 88% 60%) 100%);
+    --gradient-card: linear-gradient(145deg, hsl(0 0% 100%) 0%, hsl(220 13% 98%) 100%);
 
-    /* Shadows */
-    --shadow-soft: 0 4px 20px hsl(25 95% 53% / 0.15);
-    --shadow-card: 0 8px 32px hsl(25 95% 53% / 0.12);
-    --shadow-button: 0 4px 12px hsl(25 95% 53% / 0.3);
+    /* Modern Shadows */
+    --shadow-soft: 0 1px 3px 0 hsl(0 0% 0% / 0.1);
+    --shadow-card: 0 4px 6px -1px hsl(0 0% 0% / 0.1), 0 2px 4px -1px hsl(0 0% 0% / 0.06);
+    --shadow-button: 0 1px 2px 0 hsl(0 0% 0% / 0.05);
+    --shadow-elevated: 0 10px 15px -3px hsl(0 0% 0% / 0.1), 0 4px 6px -2px hsl(0 0% 0% / 0.05);
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
 
     --sidebar-background: 0 0% 98%;
 
