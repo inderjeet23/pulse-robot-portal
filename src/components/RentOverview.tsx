@@ -275,41 +275,41 @@ export const RentOverview = () => {
         </CardContent>
       </Card>;
   }
-  return <div className="space-y-6">
-      {/* Financial KPIs */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+  return <div className="space-y-4 md:space-y-6">
+      {/* Financial KPIs - Optimized for mobile */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-6">
         <Card className="border-primary/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Rent Due This Month</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <DollarSign className="h-5 w-5 text-primary" />
-              <span className="text-2xl font-bold">${kpis.totalDueThisMonth.toLocaleString()}</span>
+          <CardContent className="p-3 md:p-6">
+            <div className="space-y-1 md:space-y-2">
+              <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">Total Rent Due This Month</CardTitle>
+              <div className="flex items-center gap-2">
+                <DollarSign className="h-4 w-4 md:h-5 md:w-5 text-primary" />
+                <span className="text-lg md:text-2xl font-bold">${kpis.totalDueThisMonth.toLocaleString()}</span>
+              </div>
             </div>
           </CardContent>
         </Card>
 
         <Card className="border-green-500/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Collected This Month</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <TrendingUp className="h-5 w-5 text-green-600" />
-              <span className="text-2xl font-bold text-green-600">${kpis.totalCollectedThisMonth.toLocaleString()}</span>
+          <CardContent className="p-3 md:p-6">
+            <div className="space-y-1 md:space-y-2">
+              <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">Total Collected This Month</CardTitle>
+              <div className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4 md:h-5 md:w-5 text-green-600" />
+                <span className="text-lg md:text-2xl font-bold text-green-600">${kpis.totalCollectedThisMonth.toLocaleString()}</span>
+              </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="border-red-500/20">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Overdue (All Time)</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-red-600" />
-              <span className="text-2xl font-bold text-red-600">${kpis.totalOverdueAllTime.toLocaleString()}</span>
+        <Card className="border-red-500/20 sm:col-span-1 col-span-1">
+          <CardContent className="p-3 md:p-6">
+            <div className="space-y-1 md:space-y-2">
+              <CardTitle className="text-xs md:text-sm font-medium text-muted-foreground">Total Overdue (All Time)</CardTitle>
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="h-4 w-4 md:h-5 md:w-5 text-red-600" />
+                <span className="text-lg md:text-2xl font-bold text-red-600">${kpis.totalOverdueAllTime.toLocaleString()}</span>
+              </div>
             </div>
           </CardContent>
         </Card>
