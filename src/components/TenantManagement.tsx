@@ -5,9 +5,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { Users, Plus, Mail, Phone, MapPin, DollarSign } from "lucide-react";
+import { Users, Plus, Mail, Phone, MapPin, DollarSign, Search, Filter, MoreVertical, Eye, Edit, Trash2, Calendar, FileText } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 
@@ -31,8 +36,13 @@ export const TenantManagement = () => {
   const { propertyManager } = useAuth();
   const { toast } = useToast();
   const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [filteredTenants, setFilteredTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
+  const [isDetailSheetOpen, setIsDetailSheetOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -59,6 +69,7 @@ export const TenantManagement = () => {
 
       if (error) throw error;
       setTenants(data || []);
+      setFilteredTenants(data || []);
     } catch (error) {
       console.error('Error fetching tenants:', error);
       toast({
@@ -74,6 +85,56 @@ export const TenantManagement = () => {
   useEffect(() => {
     fetchTenants();
   }, [propertyManager?.id]);
+
+  // Filter tenants based on search and status
+  useEffect(() => {
+    let filtered = tenants;
+
+    // Search filter
+    if (searchQuery) {
+      filtered = filtered.filter(tenant =>
+        tenant.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        tenant.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        tenant.property_address.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        tenant.unit_number?.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
+    // Status filter (lease status)
+    if (statusFilter !== "all") {
+      const now = new Date();
+      filtered = filtered.filter(tenant => {
+        if (statusFilter === "active") {
+          return !tenant.lease_end_date || new Date(tenant.lease_end_date) > now;
+        } else if (statusFilter === "expired") {
+          return tenant.lease_end_date && new Date(tenant.lease_end_date) <= now;
+        } else if (statusFilter === "no-lease") {
+          return !tenant.lease_start_date && !tenant.lease_end_date;
+        }
+        return true;
+      });
+    }
+
+    setFilteredTenants(filtered);
+  }, [tenants, searchQuery, statusFilter]);
+
+  const getLeaseStatus = (tenant: Tenant) => {
+    if (!tenant.lease_start_date && !tenant.lease_end_date) {
+      return { status: "No Lease", variant: "secondary" as const };
+    }
+    
+    const now = new Date();
+    if (tenant.lease_end_date && new Date(tenant.lease_end_date) <= now) {
+      return { status: "Expired", variant: "destructive" as const };
+    }
+    
+    return { status: "Active", variant: "default" as const };
+  };
+
+  const handleViewDetails = (tenant: Tenant) => {
+    setSelectedTenant(tenant);
+    setIsDetailSheetOpen(true);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -152,7 +213,7 @@ export const TenantManagement = () => {
   return (
     <Card>
       <CardHeader>
-        <div className="flex justify-between items-start">
+        <div className="flex justify-between items-start mb-6">
           <div>
             <CardTitle className="flex items-center gap-2">
               <Users className="h-5 w-5" />
@@ -300,6 +361,33 @@ export const TenantManagement = () => {
             </DialogContent>
           </Dialog>
         </div>
+
+        {/* Search and Filter Section */}
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              placeholder="Search tenants by name, email, or address..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-full sm:w-48">
+              <div className="flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                <SelectValue placeholder="Filter by status" />
+              </div>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Tenants</SelectItem>
+              <SelectItem value="active">Active Leases</SelectItem>
+              <SelectItem value="expired">Expired Leases</SelectItem>
+              <SelectItem value="no-lease">No Lease Info</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </CardHeader>
 
       <CardContent>
@@ -307,72 +395,232 @@ export const TenantManagement = () => {
           <div className="text-center py-8 text-muted-foreground">
             No tenants found. Add your first tenant to get started.
           </div>
+        ) : filteredTenants.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">
+            No tenants match your search criteria. Try adjusting your filters.
+          </div>
         ) : (
-          <div className="space-y-4">
-            {tenants.map((tenant) => (
-              <div
-                key={tenant.id}
-                className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h3 className="font-medium text-lg">{tenant.name}</h3>
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
-                      {tenant.email && (
-                        <div className="flex items-center gap-1">
-                          <Mail className="h-3 w-3" />
-                          {tenant.email}
+          <div className="border rounded-lg">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Tenant</TableHead>
+                  <TableHead>Contact</TableHead>
+                  <TableHead>Property</TableHead>
+                  <TableHead>Rent</TableHead>
+                  <TableHead>Lease Status</TableHead>
+                  <TableHead className="w-12">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredTenants.map((tenant) => {
+                  const leaseStatus = getLeaseStatus(tenant);
+                  return (
+                    <TableRow 
+                      key={tenant.id} 
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => handleViewDetails(tenant)}
+                    >
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">{tenant.name}</div>
+                          {tenant.unit_number && (
+                            <div className="text-sm text-muted-foreground">
+                              Unit {tenant.unit_number}
+                            </div>
+                          )}
                         </div>
-                      )}
-                      {tenant.phone && (
-                        <div className="flex items-center gap-1">
-                          <Phone className="h-3 w-3" />
-                          {tenant.phone}
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          {tenant.email && (
+                            <div className="flex items-center gap-1 text-sm">
+                              <Mail className="h-3 w-3" />
+                              {tenant.email}
+                            </div>
+                          )}
+                          {tenant.phone && (
+                            <div className="flex items-center gap-1 text-sm">
+                              <Phone className="h-3 w-3" />
+                              {tenant.phone}
+                            </div>
+                          )}
                         </div>
-                      )}
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-lg font-semibold text-primary">
-                      ${tenant.rent_amount.toLocaleString()}/mo
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      Due {tenant.rent_due_date}{tenant.rent_due_date === 1 ? 'st' : tenant.rent_due_date === 2 ? 'nd' : tenant.rent_due_date === 3 ? 'rd' : 'th'} of month
-                    </div>
-                  </div>
-                </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-start gap-1">
+                          <MapPin className="h-3 w-3 mt-0.5 text-muted-foreground" />
+                          <span className="text-sm">{tenant.property_address}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div>
+                          <div className="font-medium">${tenant.rent_amount.toLocaleString()}</div>
+                          <div className="text-sm text-muted-foreground">
+                            Due {tenant.rent_due_date}{tenant.rent_due_date === 1 ? 'st' : tenant.rent_due_date === 2 ? 'nd' : tenant.rent_due_date === 3 ? 'rd' : 'th'}
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={leaseStatus.variant}>
+                          {leaseStatus.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewDetails(tenant);
+                            }}>
+                              <Eye className="mr-2 h-4 w-4" />
+                              View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              // TODO: Implement edit functionality
+                              toast({ title: "Coming Soon", description: "Edit functionality will be available soon." });
+                            }}>
+                              <Edit className="mr-2 h-4 w-4" />
+                              Edit Tenant
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={(e) => {
+                              e.stopPropagation();
+                              // TODO: Implement delete functionality
+                              toast({ title: "Coming Soon", description: "Delete functionality will be available soon." });
+                            }}>
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete Tenant
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        )}
 
-                <div className="grid grid-cols-2 gap-4 text-sm text-muted-foreground mb-2">
-                  <div className="flex items-center gap-1">
-                    <MapPin className="h-3 w-3" />
-                    <span>{tenant.property_address}</span>
-                    {tenant.unit_number && <span> - Unit {tenant.unit_number}</span>}
+        {/* Tenant Details Sheet */}
+        <Sheet open={isDetailSheetOpen} onOpenChange={setIsDetailSheetOpen}>
+          <SheetContent className="w-[400px] sm:w-[540px]">
+            {selectedTenant && (
+              <>
+                <SheetHeader>
+                  <SheetTitle className="flex items-center gap-2">
+                    <Users className="h-5 w-5" />
+                    {selectedTenant.name}
+                  </SheetTitle>
+                  <SheetDescription>
+                    Tenant details and lease information
+                  </SheetDescription>
+                </SheetHeader>
+
+                <div className="mt-6 space-y-6">
+                  {/* Contact Information */}
+                  <div>
+                    <h3 className="font-medium mb-3">Contact Information</h3>
+                    <div className="space-y-2">
+                      {selectedTenant.email && (
+                        <div className="flex items-center gap-2">
+                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          <span>{selectedTenant.email}</span>
+                        </div>
+                      )}
+                      {selectedTenant.phone && (
+                        <div className="flex items-center gap-2">
+                          <Phone className="h-4 w-4 text-muted-foreground" />
+                          <span>{selectedTenant.phone}</span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                  {tenant.security_deposit && (
-                    <div className="flex items-center gap-1">
-                      <DollarSign className="h-3 w-3" />
-                      <span>Security: ${tenant.security_deposit.toLocaleString()}</span>
+
+                  {/* Property Information */}
+                  <div>
+                    <h3 className="font-medium mb-3">Property Information</h3>
+                    <div className="space-y-2">
+                      <div className="flex items-start gap-2">
+                        <MapPin className="h-4 w-4 text-muted-foreground mt-0.5" />
+                        <div>
+                          <div>{selectedTenant.property_address}</div>
+                          {selectedTenant.unit_number && (
+                            <div className="text-sm text-muted-foreground">Unit {selectedTenant.unit_number}</div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Financial Information */}
+                  <div>
+                    <h3 className="font-medium mb-3">Financial Information</h3>
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-2">
+                        <DollarSign className="h-4 w-4 text-muted-foreground" />
+                        <span>Monthly Rent: ${selectedTenant.rent_amount.toLocaleString()}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        <span>Due {selectedTenant.rent_due_date}{selectedTenant.rent_due_date === 1 ? 'st' : selectedTenant.rent_due_date === 2 ? 'nd' : selectedTenant.rent_due_date === 3 ? 'rd' : 'th'} of each month</span>
+                      </div>
+                      {selectedTenant.security_deposit && (
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="h-4 w-4 text-muted-foreground" />
+                          <span>Security Deposit: ${selectedTenant.security_deposit.toLocaleString()}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Lease Information */}
+                  {(selectedTenant.lease_start_date || selectedTenant.lease_end_date) && (
+                    <div>
+                      <h3 className="font-medium mb-3">Lease Information</h3>
+                      <div className="space-y-2">
+                        {selectedTenant.lease_start_date && (
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <span>Start: {format(new Date(selectedTenant.lease_start_date), 'MMM d, yyyy')}</span>
+                          </div>
+                        )}
+                        {selectedTenant.lease_end_date && (
+                          <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-muted-foreground" />
+                            <span>End: {format(new Date(selectedTenant.lease_end_date), 'MMM d, yyyy')}</span>
+                          </div>
+                        )}
+                        <div className="mt-2">
+                          <Badge variant={getLeaseStatus(selectedTenant).variant}>
+                            {getLeaseStatus(selectedTenant).status}
+                          </Badge>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Notes */}
+                  {selectedTenant.notes && (
+                    <div>
+                      <h3 className="font-medium mb-3">Notes</h3>
+                      <div className="flex items-start gap-2">
+                        <FileText className="h-4 w-4 text-muted-foreground mt-0.5" />
+                        <p className="text-sm">{selectedTenant.notes}</p>
+                      </div>
                     </div>
                   )}
                 </div>
-
-                {(tenant.lease_start_date || tenant.lease_end_date) && (
-                  <div className="text-sm text-muted-foreground">
-                    <strong>Lease:</strong> 
-                    {tenant.lease_start_date && ` From ${format(new Date(tenant.lease_start_date), 'MMM d, yyyy')}`}
-                    {tenant.lease_end_date && ` to ${format(new Date(tenant.lease_end_date), 'MMM d, yyyy')}`}
-                  </div>
-                )}
-
-                {tenant.notes && (
-                  <div className="text-sm text-muted-foreground mt-2">
-                    <strong>Notes:</strong> {tenant.notes}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+              </>
+            )}
+          </SheetContent>
+        </Sheet>
       </CardContent>
     </Card>
   );
