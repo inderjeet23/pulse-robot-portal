@@ -16,6 +16,7 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { RentCardList } from "@/components/RentCardList";
 import { ComingSoonModal } from "@/components/ComingSoonModal";
 interface RentRecord {
   id: string;
@@ -448,98 +449,149 @@ export const RentOverview = () => {
           </TabsList>
 
           <TabsContent value={activeTab} className="mt-6">
-            {filteredRecords.length === 0 ? <div className="text-center py-8 text-muted-foreground">
+            {filteredRecords.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
                 No rent records found for this status.
-              </div> : <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-12">
-                        <Checkbox checked={selectedRecords.size === filteredRecords.length && filteredRecords.length > 0} onCheckedChange={handleSelectAll} aria-label="Select all" />
-                      </TableHead>
-                      <TableHead>Tenant</TableHead>
-                      <TableHead className="hidden md:table-cell">Property</TableHead>
-                      <TableHead>Amount Due</TableHead>
-                      <TableHead>Due Date</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="w-24">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredRecords.map(record => <TableRow key={record.id}>
-                        <TableCell>
-                          <Checkbox checked={selectedRecords.has(record.id)} onCheckedChange={checked => handleSelectRecord(record.id, checked as boolean)} aria-label={`Select ${record.tenants.name}`} />
-                        </TableCell>
-                        <TableCell className="font-medium">
-                          <div className="flex items-center gap-2">
-                            <DollarSign className="h-4 w-4" />
-                            <div>
-                              <div className="font-medium">{record.tenants.name}</div>
-                              <div className="text-sm text-muted-foreground md:hidden">
-                                {record.tenants.property_address}
-                                {record.tenants.unit_number && ` - Unit ${record.tenants.unit_number}`}
+              </div>
+            ) : (
+              <>
+                {/* Desktop Table - Hidden on mobile */}
+                <div className="hidden sm:block rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-12">
+                          <Checkbox 
+                            checked={selectedRecords.size === filteredRecords.length && filteredRecords.length > 0} 
+                            onCheckedChange={handleSelectAll} 
+                            aria-label="Select all" 
+                          />
+                        </TableHead>
+                        <TableHead>Tenant</TableHead>
+                        <TableHead className="hidden md:table-cell">Property</TableHead>
+                        <TableHead>Amount Due</TableHead>
+                        <TableHead>Due Date</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="w-24">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredRecords.map(record => (
+                        <TableRow key={record.id}>
+                          <TableCell>
+                            <Checkbox 
+                              checked={selectedRecords.has(record.id)} 
+                              onCheckedChange={checked => handleSelectRecord(record.id, checked as boolean)} 
+                              aria-label={`Select ${record.tenants.name}`} 
+                            />
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            <div className="flex items-center gap-2">
+                              <DollarSign className="h-4 w-4" />
+                              <div>
+                                <div className="font-medium">{record.tenants.name}</div>
+                                <div className="text-sm text-muted-foreground md:hidden">
+                                  {record.tenants.property_address}
+                                  {record.tenants.unit_number && ` - Unit ${record.tenants.unit_number}`}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          <div className="text-sm">
-                            {record.tenants.property_address}
-                            {record.tenants.unit_number && <div className="text-muted-foreground">Unit {record.tenants.unit_number}</div>}
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="font-medium">${record.amount_due.toLocaleString()}</div>
-                          {record.late_fees > 0 && <div className="text-sm text-destructive">
-                              +${record.late_fees.toLocaleString()} late fees
-                            </div>}
-                        </TableCell>
-                        <TableCell>
-                          <div className="text-sm">
-                            {format(new Date(record.due_date), 'MMM d, yyyy')}
-                          </div>
-                          {record.paid_date && <div className="text-xs text-muted-foreground">
-                              Paid: {format(new Date(record.paid_date), 'MMM d')}
-                            </div>}
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={statusColors[record.status] || "bg-secondary text-secondary-foreground"}>
-                            {record.status.charAt(0).toUpperCase() + record.status.slice(1)}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              {(record.status === 'pending' || record.status === 'overdue') && <DropdownMenuItem onClick={() => markAsPaid(record.id, record.amount_due)}>
-                                  Mark as Paid
-                                </DropdownMenuItem>}
-                              {record.status === 'overdue' && <DropdownMenuItem onClick={() => {
-                                setComingSoonFeature("Legal notices");
-                                setIsComingSoonOpen(true);
-                              }}>Send Notice</DropdownMenuItem>}
-                              <DropdownMenuItem onClick={() => {
-                                setComingSoonFeature("Rent record details");
-                                setIsComingSoonOpen(true);
-                              }}>View Details</DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => {
-                                setComingSoonFeature("Edit rent records");
-                                setIsComingSoonOpen(true);
-                              }}>Edit Record</DropdownMenuItem>
-                              {record.tenants.phone && <DropdownMenuItem onClick={() => window.open(`tel:${record.tenants.phone}`)}>
-                                  Call Tenant
-                                </DropdownMenuItem>}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
-                      </TableRow>)}
-                  </TableBody>
-                </Table>
-              </div>}
+                          </TableCell>
+                          <TableCell className="hidden md:table-cell">
+                            <div className="text-sm">
+                              {record.tenants.property_address}
+                              {record.tenants.unit_number && (
+                                <div className="text-muted-foreground">Unit {record.tenants.unit_number}</div>
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <div className="font-medium">${record.amount_due.toLocaleString()}</div>
+                            {record.late_fees > 0 && (
+                              <div className="text-sm text-destructive">
+                                +${record.late_fees.toLocaleString()} late fees
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <div className="text-sm">
+                              {format(new Date(record.due_date), 'MMM d, yyyy')}
+                            </div>
+                            {record.paid_date && (
+                              <div className="text-xs text-muted-foreground">
+                                Paid: {format(new Date(record.paid_date), 'MMM d')}
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={statusColors[record.status] || "bg-secondary text-secondary-foreground"}>
+                              {record.status.charAt(0).toUpperCase() + record.status.slice(1)}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8">
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                {(record.status === 'pending' || record.status === 'overdue') && (
+                                  <DropdownMenuItem onClick={() => markAsPaid(record.id, record.amount_due)}>
+                                    Mark as Paid
+                                  </DropdownMenuItem>
+                                )}
+                                {record.status === 'overdue' && (
+                                  <DropdownMenuItem onClick={() => {
+                                    setComingSoonFeature("Legal notices");
+                                    setIsComingSoonOpen(true);
+                                  }}>
+                                    Send Notice
+                                  </DropdownMenuItem>
+                                )}
+                                <DropdownMenuItem onClick={() => {
+                                  setComingSoonFeature("Rent record details");
+                                  setIsComingSoonOpen(true);
+                                }}>
+                                  View Details
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => {
+                                  setComingSoonFeature("Edit rent records");
+                                  setIsComingSoonOpen(true);
+                                }}>
+                                  Edit Record
+                                </DropdownMenuItem>
+                                {record.tenants.phone && (
+                                  <DropdownMenuItem onClick={() => window.open(`tel:${record.tenants.phone}`)}>
+                                    Call Tenant
+                                  </DropdownMenuItem>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Mobile Card List - Visible only on mobile */}
+                <div className="block sm:hidden">
+                  <RentCardList 
+                    records={filteredRecords}
+                    selectedRecords={selectedRecords}
+                    onSelectRecord={handleSelectRecord}
+                    onSelectAll={handleSelectAll}
+                    onMarkAsPaid={markAsPaid}
+                    onComingSoon={(feature) => {
+                      setComingSoonFeature(feature);
+                      setIsComingSoonOpen(true);
+                    }}
+                    statusColors={statusColors}
+                  />
+                </div>
+              </>
+            )}
           </TabsContent>
         </Tabs>
       </CardContent>

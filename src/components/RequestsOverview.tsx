@@ -10,6 +10,7 @@ import { format, differenceInDays } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { MaintenanceCardList } from "@/components/MaintenanceCardList";
 import { NewMaintenanceRequestDialog } from "./NewMaintenanceRequestDialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { AlertTriangle } from "lucide-react";
@@ -214,129 +215,140 @@ export const RequestsOverview = ({
                 No requests found for this status.
               </div>
             ) : (
-              <div className="rounded-md border">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-b">
-                      <TableHead className="font-medium">Request</TableHead>
-                      <TableHead className="font-medium">Tenant</TableHead>
-                      <TableHead className="hidden md:table-cell font-medium">Property</TableHead>
-                      <TableHead className="font-medium">Status</TableHead>
-                      <TableHead className="hidden lg:table-cell font-medium">Date</TableHead>
-                      <TableHead className="w-20"></TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredRequests.map((request) => {
-                      const StatusIcon = statusIcons[request.status];
-                      const isOverdue = request.status === 'In Progress' && 
-                        differenceInDays(new Date(), new Date(request.updated_at)) > 7;
-                      
-                      return (
-                        <TableRow 
-                          key={request.id}
-                          className={`hover:bg-muted/50 transition-colors ${isOverdue ? "bg-yellow-50 dark:bg-yellow-900/10 border-l-4 border-l-yellow-500" : ""}`}
-                        >
-                          <TableCell>
-                            <div className="space-y-1">
-                              <div className="font-medium flex items-center gap-2">
-                                {request.title}
-                                {isOverdue && (
-                                  <Tooltip>
-                                    <TooltipTrigger>
-                                      <AlertTriangle className="h-3.5 w-3.5 text-yellow-600" />
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>In progress for {differenceInDays(new Date(), new Date(request.updated_at))} days</p>
-                                    </TooltipContent>
-                                  </Tooltip>
+              <>
+                {/* Desktop Table - Hidden on mobile */}
+                <div className="hidden sm:block rounded-md border">
+                  <Table>
+                    <TableHeader>
+                      <TableRow className="border-b">
+                        <TableHead className="font-medium">Request</TableHead>
+                        <TableHead className="font-medium">Tenant</TableHead>
+                        <TableHead className="hidden md:table-cell font-medium">Property</TableHead>
+                        <TableHead className="font-medium">Status</TableHead>
+                        <TableHead className="hidden lg:table-cell font-medium">Date</TableHead>
+                        <TableHead className="w-20"></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredRequests.map((request) => {
+                        const StatusIcon = statusIcons[request.status];
+                        const isOverdue = request.status === 'In Progress' && 
+                          differenceInDays(new Date(), new Date(request.updated_at)) > 7;
+                        
+                        return (
+                          <TableRow 
+                            key={request.id}
+                            className={`hover:bg-muted/50 transition-colors ${isOverdue ? "bg-yellow-50 dark:bg-yellow-900/10 border-l-4 border-l-yellow-500" : ""}`}
+                          >
+                            <TableCell>
+                              <div className="space-y-1">
+                                <div className="font-medium flex items-center gap-2">
+                                  {request.title}
+                                  {isOverdue && (
+                                    <Tooltip>
+                                      <TooltipTrigger>
+                                        <AlertTriangle className="h-3.5 w-3.5 text-yellow-600" />
+                                      </TooltipTrigger>
+                                      <TooltipContent>
+                                        <p>In progress for {differenceInDays(new Date(), new Date(request.updated_at))} days</p>
+                                      </TooltipContent>
+                                    </Tooltip>
+                                  )}
+                                </div>
+                                <div className="text-xs text-muted-foreground flex items-center gap-2">
+                                  <span className={`w-1.5 h-1.5 rounded-full ${
+                                    request.priority === 'Urgent' ? 'bg-red-500' :
+                                    request.priority === 'High' ? 'bg-orange-500' :
+                                    request.priority === 'Medium' ? 'bg-blue-500' : 'bg-gray-400'
+                                  }`}></span>
+                                  {request.request_type} • {request.priority}
+                                </div>
+                                <div className="text-xs text-muted-foreground md:hidden">
+                                  {request.property_address}
+                                  {request.unit_number && ` - Unit ${request.unit_number}`}
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell>
+                              <div className="space-y-1">
+                                <div className="font-medium text-sm">{request.tenant_name}</div>
+                              </div>
+                            </TableCell>
+                            <TableCell className="hidden md:table-cell">
+                              <div className="text-sm space-y-1">
+                                <div>{request.property_address}</div>
+                                {request.unit_number && (
+                                  <div className="text-muted-foreground text-xs">Unit {request.unit_number}</div>
                                 )}
                               </div>
-                              <div className="text-xs text-muted-foreground flex items-center gap-2">
-                                <span className={`w-1.5 h-1.5 rounded-full ${
-                                  request.priority === 'Urgent' ? 'bg-red-500' :
-                                  request.priority === 'High' ? 'bg-orange-500' :
-                                  request.priority === 'Medium' ? 'bg-blue-500' : 'bg-gray-400'
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <span className={`w-2 h-2 rounded-full ${
+                                  request.status === 'New' ? 'bg-red-500' :
+                                  request.status === 'In Progress' ? 'bg-blue-500' :
+                                  request.status === 'Completed' ? 'bg-green-500' : 'bg-gray-400'
                                 }`}></span>
-                                {request.request_type} • {request.priority}
+                                <span className="text-sm">{request.status}</span>
                               </div>
-                              <div className="text-xs text-muted-foreground md:hidden">
-                                {request.property_address}
-                                {request.unit_number && ` - Unit ${request.unit_number}`}
-                              </div>
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="space-y-1">
-                              <div className="font-medium text-sm">{request.tenant_name}</div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            <div className="text-sm space-y-1">
-                              <div>{request.property_address}</div>
-                              {request.unit_number && (
-                                <div className="text-muted-foreground text-xs">Unit {request.unit_number}</div>
-                              )}
-                            </div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center gap-2">
-                              <span className={`w-2 h-2 rounded-full ${
-                                request.status === 'New' ? 'bg-red-500' :
-                                request.status === 'In Progress' ? 'bg-blue-500' :
-                                request.status === 'Completed' ? 'bg-green-500' : 'bg-gray-400'
-                              }`}></span>
-                              <span className="text-sm">{request.status}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="hidden lg:table-cell text-xs text-muted-foreground">
-                            {format(new Date(request.created_at), 'MMM d')}
-                          </TableCell>
-                          <TableCell>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  className="h-8 w-8 p-0 hover:bg-muted"
-                                >
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-48">
-                                {request.status === 'New' && (
-                                  <DropdownMenuItem
-                                    onClick={() => updateRequestStatus(request.id, 'In Progress')}
-                                    className="text-blue-600 hover:text-blue-700"
+                            </TableCell>
+                            <TableCell className="hidden lg:table-cell text-xs text-muted-foreground">
+                              {format(new Date(request.created_at), 'MMM d')}
+                            </TableCell>
+                            <TableCell>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button 
+                                    variant="ghost" 
+                                    size="sm" 
+                                    className="h-8 w-8 p-0 hover:bg-muted"
                                   >
-                                    Start Work
-                                  </DropdownMenuItem>
-                                )}
-                                {request.status === 'In Progress' && (
-                                  <DropdownMenuItem
-                                    onClick={() => updateRequestStatus(request.id, 'Completed')}
-                                    className="text-green-600 hover:text-green-700"
-                                  >
-                                    Mark Complete
-                                  </DropdownMenuItem>
-                                )}
-                                {request.tenant_phone && (
-                                  <DropdownMenuItem
-                                    onClick={() => window.open(`tel:${request.tenant_phone}`)}
-                                  >
-                                    <Phone className="h-4 w-4 mr-2" />
-                                    Call Tenant
-                                  </DropdownMenuItem>
-                                )}
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
-                      );
-                    })}
-                  </TableBody>
-                </Table>
-              </div>
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="w-48">
+                                  {request.status === 'New' && (
+                                    <DropdownMenuItem
+                                      onClick={() => updateRequestStatus(request.id, 'In Progress')}
+                                      className="text-blue-600 hover:text-blue-700"
+                                    >
+                                      Start Work
+                                    </DropdownMenuItem>
+                                  )}
+                                  {request.status === 'In Progress' && (
+                                    <DropdownMenuItem
+                                      onClick={() => updateRequestStatus(request.id, 'Completed')}
+                                      className="text-green-600 hover:text-green-700"
+                                    >
+                                      Mark Complete
+                                    </DropdownMenuItem>
+                                  )}
+                                  {request.tenant_phone && (
+                                    <DropdownMenuItem
+                                      onClick={() => window.open(`tel:${request.tenant_phone}`)}
+                                    >
+                                      <Phone className="h-4 w-4 mr-2" />
+                                      Call Tenant
+                                    </DropdownMenuItem>
+                                  )}
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+
+                {/* Mobile Card List - Visible only on mobile */}
+                <div className="block sm:hidden">
+                  <MaintenanceCardList 
+                    requests={filteredRequests}
+                    onUpdateStatus={updateRequestStatus}
+                  />
+                </div>
+              </>
             )}
           </TabsContent>
         </Tabs>
