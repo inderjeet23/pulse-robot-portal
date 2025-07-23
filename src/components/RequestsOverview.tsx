@@ -158,28 +158,30 @@ export const RequestsOverview = ({
       <CardHeader>
         <div className="flex justify-between items-start">
           <div>
-            <CardTitle className="flex items-center gap-2">
-              <Wrench className="h-5 w-5" />
+            <CardTitle className="text-xl font-semibold flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Wrench className="h-5 w-5 text-primary" />
+              </div>
               Maintenance Requests
             </CardTitle>
-            <CardDescription>
-              Track and manage property maintenance requests
+            <CardDescription className="mt-1">
+              Track and manage all property requests
             </CardDescription>
           </div>
           <Button 
             size="sm" 
-            className="flex items-center gap-2"
+            className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-button"
             onClick={() => setNewRequestDialogOpen(true)}
           >
-            <Plus className="h-4 w-4" />
+            <Plus className="h-4 w-4 mr-2" />
             New Request
           </Button>
         </div>
         
-        {/* Stats Overview */}
-        <div className="grid grid-cols-4 gap-4 mt-4">
+        {/* Simplified Stats */}
+        <div className="flex gap-6 mt-6 p-4 bg-muted/20 rounded-lg border">
           <div className="text-center">
-            <div className="text-2xl font-bold text-primary">{stats.total}</div>
+            <div className="text-2xl font-bold">{stats.total}</div>
             <div className="text-sm text-muted-foreground">Total</div>
           </div>
           <div className="text-center">
@@ -188,11 +190,11 @@ export const RequestsOverview = ({
           </div>
           <div className="text-center">
             <div className="text-2xl font-bold text-primary">{stats.inProgress}</div>
-            <div className="text-sm text-muted-foreground">In Progress</div>
+            <div className="text-sm text-muted-foreground">Active</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl font-bold text-accent">{stats.completed}</div>
-            <div className="text-sm text-muted-foreground">Completed</div>
+            <div className="text-2xl font-bold text-green-600">{stats.completed}</div>
+            <div className="text-sm text-muted-foreground">Done</div>
           </div>
         </div>
       </CardHeader>
@@ -215,14 +217,13 @@ export const RequestsOverview = ({
               <div className="rounded-md border">
                 <Table>
                   <TableHeader>
-                    <TableRow>
-                      <TableHead>Title</TableHead>
-                      <TableHead>Tenant</TableHead>
-                      <TableHead className="hidden md:table-cell">Property</TableHead>
-                      <TableHead>Priority</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="hidden lg:table-cell">Created</TableHead>
-                      <TableHead className="w-24">Actions</TableHead>
+                    <TableRow className="border-b">
+                      <TableHead className="font-medium">Request</TableHead>
+                      <TableHead className="font-medium">Tenant</TableHead>
+                      <TableHead className="hidden md:table-cell font-medium">Property</TableHead>
+                      <TableHead className="font-medium">Status</TableHead>
+                      <TableHead className="hidden lg:table-cell font-medium">Date</TableHead>
+                      <TableHead className="w-20"></TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -234,106 +235,101 @@ export const RequestsOverview = ({
                       return (
                         <TableRow 
                           key={request.id}
-                          className={isOverdue ? "bg-yellow-50 dark:bg-yellow-900/10" : ""}
+                          className={`hover:bg-muted/50 transition-colors ${isOverdue ? "bg-yellow-50 dark:bg-yellow-900/10 border-l-4 border-l-yellow-500" : ""}`}
                         >
-                          <TableCell className="font-medium">
-                            <div className="flex items-center gap-2">
-                              <StatusIcon className="h-4 w-4" />
-                              <div>
-                                <div className="font-medium flex items-center gap-2">
-                                  {request.title}
-                                  {isOverdue && (
-                                    <Tooltip>
-                                      <TooltipTrigger>
-                                        <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                                      </TooltipTrigger>
-                                      <TooltipContent>
-                                        <p>This request has been in progress for {differenceInDays(new Date(), new Date(request.updated_at))} days</p>
-                                      </TooltipContent>
-                                    </Tooltip>
-                                  )}
-                                </div>
-                                <div className="text-sm text-muted-foreground md:hidden">
-                                  {request.property_address}
-                                  {request.unit_number && ` - Unit ${request.unit_number}`}
-                                </div>
+                          <TableCell>
+                            <div className="space-y-1">
+                              <div className="font-medium flex items-center gap-2">
+                                {request.title}
+                                {isOverdue && (
+                                  <Tooltip>
+                                    <TooltipTrigger>
+                                      <AlertTriangle className="h-3.5 w-3.5 text-yellow-600" />
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>In progress for {differenceInDays(new Date(), new Date(request.updated_at))} days</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                )}
+                              </div>
+                              <div className="text-xs text-muted-foreground flex items-center gap-2">
+                                <span className={`w-1.5 h-1.5 rounded-full ${
+                                  request.priority === 'Urgent' ? 'bg-red-500' :
+                                  request.priority === 'High' ? 'bg-orange-500' :
+                                  request.priority === 'Medium' ? 'bg-blue-500' : 'bg-gray-400'
+                                }`}></span>
+                                {request.request_type} • {request.priority}
+                              </div>
+                              <div className="text-xs text-muted-foreground md:hidden">
+                                {request.property_address}
+                                {request.unit_number && ` - Unit ${request.unit_number}`}
                               </div>
                             </div>
                           </TableCell>
                           <TableCell>
-                            <div>
-                              <div className="font-medium">{request.tenant_name}</div>
-                              <div className="text-sm text-muted-foreground">{request.request_type}</div>
+                            <div className="space-y-1">
+                              <div className="font-medium text-sm">{request.tenant_name}</div>
                             </div>
                           </TableCell>
                           <TableCell className="hidden md:table-cell">
-                            <div className="text-sm">
-                              {request.property_address}
+                            <div className="text-sm space-y-1">
+                              <div>{request.property_address}</div>
                               {request.unit_number && (
-                                <div className="text-muted-foreground">Unit {request.unit_number}</div>
+                                <div className="text-muted-foreground text-xs">Unit {request.unit_number}</div>
                               )}
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Badge className={priorityColors[request.priority] || "bg-secondary text-secondary-foreground"}>
-                              {request.priority}
-                            </Badge>
+                            <div className="flex items-center gap-2">
+                              <span className={`w-2 h-2 rounded-full ${
+                                request.status === 'New' ? 'bg-red-500' :
+                                request.status === 'In Progress' ? 'bg-blue-500' :
+                                request.status === 'Completed' ? 'bg-green-500' : 'bg-gray-400'
+                              }`}></span>
+                              <span className="text-sm">{request.status}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="hidden lg:table-cell text-xs text-muted-foreground">
+                            {format(new Date(request.created_at), 'MMM d')}
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline">
-                              {request.status}
-                            </Badge>
-                          </TableCell>
-                          <TableCell className="hidden lg:table-cell text-sm text-muted-foreground">
-                            {format(new Date(request.created_at), 'MMM d, yyyy')}
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex gap-1">
-                              {/* Mobile quick call button */}
-                              {request.tenant_phone && (
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  className="h-8 w-8 md:hidden"
-                                  onClick={() => window.open(`tel:${request.tenant_phone}`)}
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  className="h-8 w-8 p-0 hover:bg-muted"
                                 >
-                                  <Phone className="h-4 w-4" />
+                                  <MoreHorizontal className="h-4 w-4" />
                                 </Button>
-                              )}
-                              
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                                    <MoreHorizontal className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  {request.status === 'New' && (
-                                    <DropdownMenuItem
-                                      onClick={() => updateRequestStatus(request.id, 'In Progress')}
-                                    >
-                                      Start Work
-                                    </DropdownMenuItem>
-                                  )}
-                                  {request.status === 'In Progress' && (
-                                    <DropdownMenuItem
-                                      onClick={() => updateRequestStatus(request.id, 'Completed')}
-                                    >
-                                      Mark Complete
-                                    </DropdownMenuItem>
-                                  )}
-                                  <DropdownMenuItem>View Details</DropdownMenuItem>
-                                  <DropdownMenuItem>Update Status</DropdownMenuItem>
-                                  {request.tenant_phone && (
-                                    <DropdownMenuItem
-                                      onClick={() => window.open(`tel:${request.tenant_phone}`)}
-                                    >
-                                      Call Tenant
-                                    </DropdownMenuItem>
-                                  )}
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-48">
+                                {request.status === 'New' && (
+                                  <DropdownMenuItem
+                                    onClick={() => updateRequestStatus(request.id, 'In Progress')}
+                                    className="text-blue-600 hover:text-blue-700"
+                                  >
+                                    Start Work
+                                  </DropdownMenuItem>
+                                )}
+                                {request.status === 'In Progress' && (
+                                  <DropdownMenuItem
+                                    onClick={() => updateRequestStatus(request.id, 'Completed')}
+                                    className="text-green-600 hover:text-green-700"
+                                  >
+                                    Mark Complete
+                                  </DropdownMenuItem>
+                                )}
+                                {request.tenant_phone && (
+                                  <DropdownMenuItem
+                                    onClick={() => window.open(`tel:${request.tenant_phone}`)}
+                                  >
+                                    <Phone className="h-4 w-4 mr-2" />
+                                    Call Tenant
+                                  </DropdownMenuItem>
+                                )}
+                              </DropdownMenuContent>
+                            </DropdownMenu>
                           </TableCell>
                         </TableRow>
                       );

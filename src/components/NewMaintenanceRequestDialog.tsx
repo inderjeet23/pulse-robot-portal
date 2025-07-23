@@ -248,18 +248,21 @@ export function NewMaintenanceRequestDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Create New Maintenance Request</DialogTitle>
-          <DialogDescription>
-            Log a request on behalf of a tenant or for general property maintenance.
+        <DialogHeader className="text-center">
+          <DialogTitle className="text-xl font-semibold">Create New Request</DialogTitle>
+          <DialogDescription className="text-muted-foreground">
+            Quick form to log maintenance requests
           </DialogDescription>
         </DialogHeader>
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            {/* Tenant Information Section */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">Tenant Information</h3>
+            {/* Primary Section: Who & Where */}
+            <div className="space-y-4 p-4 bg-muted/20 rounded-lg border">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-primary"></div>
+                <h3 className="font-medium">Who & Where</h3>
+              </div>
               
               {/* Internal Request Checkbox */}
               <FormField
@@ -451,9 +454,12 @@ export function NewMaintenanceRequestDialog({
               </div>
             </div>
 
-            {/* Issue Details Section */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">Issue Details</h3>
+            {/* Primary Section: What's the Issue */}
+            <div className="space-y-4 p-4 bg-muted/20 rounded-lg border">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-primary"></div>
+                <h3 className="font-medium">What's the Issue</h3>
+              </div>
 
               <FormField
                 control={form.control}
@@ -540,21 +546,23 @@ export function NewMaintenanceRequestDialog({
               />
             </div>
 
-            {/* Optional Details Section */}
-            <Accordion type="single" collapsible>
-              <AccordionItem value="optional-details">
-                <AccordionTrigger>
-                  Assignment and Cost Details (Optional)
-                </AccordionTrigger>
-                <AccordionContent className="space-y-4">
+            {/* Optional Section - Show/Hide Toggle */}
+            <details className="group">
+              <summary className="flex items-center gap-2 text-sm font-medium cursor-pointer text-muted-foreground hover:text-foreground transition-colors">
+                <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground group-open:bg-primary transition-colors"></div>
+                Advanced Options
+                <span className="ml-auto text-xs group-open:hidden">Click to expand</span>
+              </summary>
+              <div className="mt-4 p-4 bg-muted/10 rounded-lg border space-y-4">
+                <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="assignedTo"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Assigned To</FormLabel>
+                        <FormLabel className="text-sm">Assigned To</FormLabel>
                         <FormControl>
-                          <Input {...field} placeholder="Contractor or maintenance person" />
+                          <Input {...field} placeholder="Contractor or staff" className="h-9" />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -566,35 +574,42 @@ export function NewMaintenanceRequestDialog({
                     name="estimatedCost"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Estimated Cost</FormLabel>
+                        <FormLabel className="text-sm">Estimated Cost</FormLabel>
                         <FormControl>
                           <Input 
                             {...field} 
                             type="number" 
+                            min="0" 
                             step="0.01"
-                            placeholder="0.00" 
+                            placeholder="0.00"
+                            className="h-9"
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
+                </div>
+              </div>
+            </details>
 
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
+            <DialogFooter className="flex gap-3 pt-6">
+              <Button 
+                type="button" 
+                variant="ghost" 
                 onClick={() => onOpenChange(false)}
                 disabled={submitting}
+                className="flex-1"
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={submitting}>
+              <Button 
+                type="submit" 
+                disabled={submitting}
+                className="flex-1 bg-primary hover:bg-primary/90 text-primary-foreground font-medium shadow-button"
+              >
                 {submitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Create Request
+                {submitting ? "Creating..." : "Create Request"}
               </Button>
             </DialogFooter>
           </form>

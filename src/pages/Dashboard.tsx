@@ -139,20 +139,26 @@ const Dashboard = () => {
       <StatusCard />
       
       {/* Key Metrics */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <Tooltip>
           <TooltipTrigger asChild>
-            <Card className="cursor-help hover:shadow-md transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Overdue Rent</CardTitle>
-                <DollarSign className="h-4 w-4 text-destructive" />
+            <Card className="cursor-help hover:shadow-card transition-all duration-200 group">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <div className="p-2 rounded-lg bg-red-50 dark:bg-red-900/20 group-hover:bg-red-100 dark:group-hover:bg-red-900/30 transition-colors">
+                    <DollarSign className="h-5 w-5 text-red-600" />
+                  </div>
+                  <div className="text-right">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">Overdue Rent</CardTitle>
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">${stats.overdueRentAmount.toLocaleString()}</div>
+              <CardContent className="pt-0">
+                <div className="text-3xl font-bold">${stats.overdueRentAmount.toLocaleString()}</div>
                 {stats.overdueTenantsCount > 0 && (
-                  <Badge variant="destructive" className="mt-1">
-                    {stats.overdueTenantsCount} tenants
-                  </Badge>
+                  <p className="text-sm text-red-600 mt-1 font-medium">
+                    {stats.overdueTenantsCount} tenant{stats.overdueTenantsCount > 1 ? 's' : ''} overdue
+                  </p>
                 )}
               </CardContent>
             </Card>
@@ -179,86 +185,98 @@ const Dashboard = () => {
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Card className="cursor-help hover:shadow-md transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Tenants Overdue</CardTitle>
-                <AlertTriangle className="h-4 w-4 text-destructive" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.overdueTenantsCount}</div>
-                {stats.overdueTenantsCount > 0 && (
-                  <Badge variant="destructive" className="mt-1">Needs Attention</Badge>
-                )}
-              </CardContent>
-            </Card>
-          </TooltipTrigger>
-          {stats.overdueTenantsDetails.length > 0 && (
-            <TooltipContent>
-              <div className="space-y-1">
-                <p className="font-semibold">Overdue Tenants:</p>
-                {stats.overdueTenantsDetails.slice(0, 5).map((tenant, i) => (
-                  <div key={i} className="text-xs">
-                    {tenant.name} - {tenant.property_address}
-                    {tenant.unit_number && ` Unit ${tenant.unit_number}`}
+            <Card className="cursor-help hover:shadow-card transition-all duration-200 group">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <div className="p-2 rounded-lg bg-blue-50 dark:bg-blue-900/20 group-hover:bg-blue-100 dark:group-hover:bg-blue-900/30 transition-colors">
+                    <Wrench className="h-5 w-5 text-blue-600" />
                   </div>
-                ))}
-                {stats.overdueTenantsDetails.length > 5 && (
-                  <div className="text-xs text-muted-foreground">
-                    +{stats.overdueTenantsDetails.length - 5} more...
+                  <div className="text-right">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">New Requests</CardTitle>
                   </div>
-                )}
-              </div>
-            </TooltipContent>
-          )}
-        </Tooltip>
-
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Card className="cursor-help hover:shadow-md transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">New Maintenance</CardTitle>
-                <Wrench className="h-4 w-4 text-primary" />
+                </div>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.newRequests}</div>
+              <CardContent className="pt-0">
+                <div className="text-3xl font-bold">{stats.newRequests}</div>
                 {stats.newRequests > 0 && (
-                  <Badge variant="secondary" className="mt-1">Pending Review</Badge>
+                  <p className="text-sm text-blue-600 mt-1 font-medium">
+                    Pending review
+                  </p>
                 )}
               </CardContent>
             </Card>
           </TooltipTrigger>
-          {stats.newRequestsDetails.length > 0 && (
-            <TooltipContent>
-              <div className="space-y-1">
-                <p className="font-semibold">New Requests:</p>
-                {stats.newRequestsDetails.slice(0, 5).map((request, i) => (
-                  <div key={i} className="text-xs">
-                    <span className="font-medium">{request.title}</span> - {request.tenant_name}
-                    <Badge variant="outline" className="ml-1 text-xs">{request.priority}</Badge>
-                  </div>
-                ))}
-                {stats.newRequestsDetails.length > 5 && (
-                  <div className="text-xs text-muted-foreground">
-                    +{stats.newRequestsDetails.length - 5} more...
-                  </div>
-                )}
-              </div>
-            </TooltipContent>
-          )}
+           {stats.newRequestsDetails.length > 0 && (
+             <TooltipContent>
+               <div className="space-y-1">
+                 <p className="font-semibold">New Requests:</p>
+                 {stats.newRequestsDetails.slice(0, 5).map((request, i) => (
+                   <div key={i} className="text-xs">
+                     <span className="font-medium">{request.title}</span> - {request.tenant_name}
+                     <Badge variant="outline" className="ml-1 text-xs">{request.priority}</Badge>
+                   </div>
+                 ))}
+                 {stats.newRequestsDetails.length > 5 && (
+                   <div className="text-xs text-muted-foreground">
+                     +{stats.newRequestsDetails.length - 5} more...
+                   </div>
+                 )}
+               </div>
+             </TooltipContent>
+           )}
         </Tooltip>
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Card className="cursor-help hover:shadow-md transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Leases Expiring</CardTitle>
-                <Users className="h-4 w-4 text-primary" />
+            <Card className="cursor-help hover:shadow-card transition-all duration-200 group">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <div className="p-2 rounded-lg bg-green-50 dark:bg-green-900/20 group-hover:bg-green-100 dark:group-hover:bg-green-900/30 transition-colors">
+                    <Users className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div className="text-right">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">Total Tenants</CardTitle>
+                  </div>
+                </div>
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stats.leasesExpiringSoon}</div>
-                <p className="text-xs text-muted-foreground mt-1">Next 60 days</p>
+              <CardContent className="pt-0">
+                <div className="text-3xl font-bold">{stats.totalTenants}</div>
+                <p className="text-sm text-muted-foreground mt-1">
+                  Active leases
+                </p>
+              </CardContent>
+            </Card>
+          </TooltipTrigger>
+           <TooltipContent>
+             <div className="space-y-1">
+               <p className="font-semibold">Total Tenants:</p>
+               <p className="text-xs text-muted-foreground">
+                 All tenants with active leases
+               </p>
+             </div>
+           </TooltipContent>
+        </Tooltip>
+
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Card className="cursor-help hover:shadow-card transition-all duration-200 group">
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between">
+                  <div className="p-2 rounded-lg bg-orange-50 dark:bg-orange-900/20 group-hover:bg-orange-100 dark:group-hover:bg-orange-900/30 transition-colors">
+                    <AlertTriangle className="h-5 w-5 text-orange-600" />
+                  </div>
+                  <div className="text-right">
+                    <CardTitle className="text-sm font-medium text-muted-foreground">Leases Expiring</CardTitle>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <div className="text-3xl font-bold">{stats.leasesExpiringSoon}</div>
+                <p className="text-sm text-muted-foreground mt-1">Next 60 days</p>
                 {stats.leasesExpiringSoon > 0 && (
-                  <Badge variant="secondary" className="mt-1">Review Soon</Badge>
+                  <p className="text-sm text-orange-600 mt-1 font-medium">
+                    Review soon
+                  </p>
                 )}
               </CardContent>
             </Card>
