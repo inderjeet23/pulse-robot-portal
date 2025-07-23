@@ -244,14 +244,22 @@ const Dashboard = () => {
 
         {/* Recent Activity Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Urgent Items */}
-          <Card className="border-red-200 dark:border-red-800 animate-pulse-error">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-semibold text-red-700 dark:text-red-400 flex items-center gap-2 animate-pulse">
-                <AlertTriangle className="w-5 h-5" />
-                Requires Immediate Attention
-              </CardTitle>
-            </CardHeader>
+        {/* Urgent Items */}
+        <Card className={`${stats.overdueTenantsCount > 0 || stats.newRequests > 3 
+          ? 'border-red-200 dark:border-red-800 animate-pulse-error' 
+          : 'border-green-200 dark:border-green-800'}`}>
+          <CardHeader className="pb-4">
+            <CardTitle className={`text-lg font-semibold flex items-center gap-2 ${
+              stats.overdueTenantsCount > 0 || stats.newRequests > 3
+                ? 'text-red-700 dark:text-red-400 animate-pulse'
+                : 'text-green-700 dark:text-green-400'
+            }`}>
+              <AlertTriangle className="w-5 h-5" />
+              {stats.overdueTenantsCount > 0 || stats.newRequests > 3 
+                ? 'Requires Immediate Attention' 
+                : 'System Status'}
+            </CardTitle>
+          </CardHeader>
             <CardContent>
               {stats.overdueTenantsCount > 0 || stats.newRequests > 3 ? (
                 <div className="space-y-3">
