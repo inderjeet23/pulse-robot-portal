@@ -161,10 +161,18 @@ export default {
 				},
 				'pulse-error': {
 					'0%, 100%': { 
-						boxShadow: '0 0 0 0 hsl(var(--error) / 0.4)' 
+						boxShadow: '0 0 0 0 hsl(0 72% 51% / 0.4)' 
 					},
 					'50%': { 
-						boxShadow: '0 0 0 4px hsl(var(--error) / 0.1)' 
+						boxShadow: '0 0 0 4px hsl(0 72% 51% / 0.1)' 
+					}
+				},
+				'float': {
+					'0%, 100%': { 
+						transform: 'translateY(0px)' 
+					},
+					'50%': { 
+						transform: 'translateY(-4px)' 
 					}
 				}
 			},
@@ -173,7 +181,8 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'shimmer': 'shimmer 2s linear infinite',
 				'count-up': 'count-up 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-				'pulse-error': 'pulse-error 2s infinite'
+				'pulse-error': 'pulse-error 2s infinite',
+				'float': 'float 3s ease-in-out infinite'
 			}
 		}
 	},

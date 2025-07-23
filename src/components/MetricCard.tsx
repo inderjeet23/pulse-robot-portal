@@ -1,5 +1,6 @@
 import { LucideIcon, TrendingUp, TrendingDown } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 interface MetricCardProps {
@@ -56,53 +57,72 @@ export function MetricCard({
   }
 
   return (
-    <Card 
-      className={cn(
-        "h-32 p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg border-2",
-        statusColors[status],
-        onClick && "cursor-pointer"
-      )}
-      onClick={onClick}
-    >
-      <CardContent className="p-0 h-full flex flex-col justify-between">
-        {/* Header with icon and status indicator */}
-        <div className="flex items-center justify-between">
-          <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 shadow-sm">
-            <Icon className="w-5 h-5" />
-          </div>
-          <div className={cn(
-            "w-3 h-3 rounded-full",
-            statusIndicators[status]
-          )}></div>
-        </div>
-        
-        {/* Metric value and trend */}
-        <div className="space-y-1">
-          <div className="flex items-baseline gap-2">
-            <div className="text-2xl font-bold font-mono text-gray-900 dark:text-gray-100">
-              {value}
-            </div>
-            {trend && (
-              <div className="flex items-center gap-1">
-                {trend.direction === 'up' ? (
-                  <TrendingUp className="w-3 h-3 text-emerald-500" />
-                ) : (
-                  <TrendingDown className="w-3 h-3 text-red-500" />
-                )}
-                <span className={cn(
-                  "text-xs font-medium",
-                  trend.direction === 'up' ? "text-emerald-500" : "text-red-500"
-                )}>
-                  {trend.percentage}%
-                </span>
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Card 
+          className={cn(
+            "h-32 p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-xl border-2 group",
+            statusColors[status],
+            onClick && "cursor-pointer hover:scale-[1.02]"
+          )}
+          onClick={onClick}
+          style={{
+            transition: 'all 200ms cubic-bezier(0.4, 0, 0.2, 1)'
+          }}
+        >
+          <CardContent className="p-0 h-full flex flex-col justify-between">
+            {/* Header with icon and status indicator */}
+            <div className="flex items-center justify-between">
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 shadow-sm group-hover:scale-110 transition-transform">
+                <Icon className="w-5 h-5" />
               </div>
-            )}
-          </div>
-          <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
-            {label}
-          </div>
+              <div className={cn(
+                "w-3 h-3 rounded-full animate-pulse",
+                statusIndicators[status]
+              )}></div>
+            </div>
+            
+            {/* Metric value and trend */}
+            <div className="space-y-1">
+              <div className="flex items-baseline gap-2">
+                <div className="text-2xl font-bold font-mono text-gray-900 dark:text-gray-100">
+                  {value}
+                </div>
+                {trend && (
+                  <div className="flex items-center gap-1 animate-float">
+                    {trend.direction === 'up' ? (
+                      <TrendingUp className="w-3 h-3 text-emerald-500" />
+                    ) : (
+                      <TrendingDown className="w-3 h-3 text-red-500" />
+                    )}
+                    <span className={cn(
+                      "text-xs font-medium",
+                      trend.direction === 'up' ? "text-emerald-500" : "text-red-500"
+                    )}>
+                      {trend.percentage}%
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+                {label}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      </TooltipTrigger>
+      <TooltipContent>
+        <div className="space-y-1">
+          <p className="font-semibold">{label} Details</p>
+          <p className="text-xs">Current: {value}</p>
+          {trend && (
+            <p className="text-xs">
+              {trend.direction === 'up' ? '↗' : '↘'} {trend.percentage}% from last month
+            </p>
+          )}
+          <p className="text-xs text-muted-foreground">Click for detailed view</p>
         </div>
-      </CardContent>
-    </Card>
+      </TooltipContent>
+    </Tooltip>
   );
 }

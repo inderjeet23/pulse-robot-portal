@@ -196,7 +196,7 @@ const Dashboard = () => {
             label="Avg Response Time"
             value={`${stats.avgResponseTime}d`}
             icon={Clock}
-            status={stats.avgResponseTime < 2 ? "success" : stats.avgResponseTime < 4 ? "warning" : "critical"}
+            status={stats.avgResponseTime < 1 ? "success" : stats.avgResponseTime < 3 ? "warning" : "critical"}
             trend={{ direction: 'down', percentage: 15 }}
             loading={loading}
             onClick={() => console.log("Navigate to performance")}
@@ -214,10 +214,10 @@ const Dashboard = () => {
                 <Button
                   key={index}
                   variant="outline"
-                  className="h-20 flex flex-col items-center justify-center space-y-2 hover:bg-gray-50 dark:hover:bg-gray-800"
+                  className="h-20 flex flex-col items-center justify-center space-y-2 transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-950/20 hover:border-blue-300 dark:hover:border-blue-700 hover:scale-105 hover:shadow-lg group"
                   onClick={action.action}
                 >
-                  <action.icon className="w-5 h-5" />
+                  <action.icon className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
                   <div className="text-center">
                     <div className="text-sm font-medium">{action.title}</div>
                     <div className="text-xs text-muted-foreground">{action.description}</div>
@@ -231,9 +231,9 @@ const Dashboard = () => {
         {/* Recent Activity Section */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Urgent Items */}
-          <Card className="border-red-200 dark:border-red-800">
-            <CardHeader>
-              <CardTitle className="text-lg font-semibold text-red-700 dark:text-red-400 flex items-center gap-2">
+          <Card className="border-red-200 dark:border-red-800 animate-pulse-error">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-semibold text-red-700 dark:text-red-400 flex items-center gap-2 animate-pulse">
                 <AlertTriangle className="w-5 h-5" />
                 Requires Immediate Attention
               </CardTitle>
