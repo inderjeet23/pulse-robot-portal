@@ -7,6 +7,10 @@ import { DollarSign, Wrench, Users, AlertTriangle, Home, Clock, Plus, Calendar, 
 import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { AddTenantDialog } from "@/components/AddTenantDialog";
+import { RecordPaymentDialog } from "@/components/RecordPaymentDialog";
+import { NewMaintenanceRequestDialog } from "@/components/NewMaintenanceRequestDialog";
+import { useNavigate } from "react-router-dom";
 
 interface DashboardStats {
   overdueRentAmount: number;
@@ -29,6 +33,7 @@ interface QuickAction {
 
 const Dashboard = () => {
   const { propertyManager } = useAuth();
+  const navigate = useNavigate();
   const [stats, setStats] = useState<DashboardStats>({
     overdueRentAmount: 0,
     overdueTenantsCount: 0,
@@ -40,97 +45,106 @@ const Dashboard = () => {
     avgResponseTime: 2.3,
   });
   const [loading, setLoading] = useState(true);
+  const [addTenantOpen, setAddTenantOpen] = useState(false);
+  const [recordPaymentOpen, setRecordPaymentOpen] = useState(false);
+  const [newMaintenanceOpen, setNewMaintenanceOpen] = useState(false);
+
+  const fetchStats = async () => {
+    if (!propertyManager?.id) return;
+
+    try {
+      // Fetch overdue rent records
+      const { data: overdueRent } = await supabase
+        .from("rent_records")
+        .select("amount_due, late_fees")
+        .eq("property_manager_id", propertyManager.id)
+        .eq("status", "overdue");
+
+      // Fetch new maintenance requests
+      const { data: newRequests } = await supabase
+        .from("maintenance_requests")
+        .select("id")
+        .eq("property_manager_id", propertyManager.id)
+        .eq("status", "New");
+
+      // Fetch tenants
+      const { data: tenants } = await supabase
+        .from("tenants")
+        .select("id, lease_end_date, property_address")
+        .eq("property_manager_id", propertyManager.id);
+
+      // Calculate leases expiring in next 60 days
+      const today = new Date();
+      const sixtyDaysFromNow = new Date();
+      sixtyDaysFromNow.setDate(today.getDate() + 60);
+      
+      const leasesExpiringSoon = tenants?.filter(tenant => {
+        if (!tenant.lease_end_date) return false;
+        const leaseEndDate = new Date(tenant.lease_end_date);
+        return leaseEndDate >= today && leaseEndDate <= sixtyDaysFromNow;
+      }).length || 0;
+
+      // Calculate total overdue amount
+      const overdueAmount = overdueRent?.reduce((sum, record) => 
+        sum + (Number(record.amount_due) || 0) + (Number(record.late_fees) || 0), 0) || 0;
+
+      // Count unique properties
+      const uniqueProperties = new Set(tenants?.map(t => t.property_address) || []).size;
+
+      setStats({
+        overdueRentAmount: overdueAmount,
+        overdueTenantsCount: overdueRent?.length || 0,
+        newRequests: newRequests?.length || 0,
+        totalTenants: tenants?.length || 0,
+        leasesExpiringSoon,
+        totalProperties: uniqueProperties,
+        occupancyRate: 95,
+        avgResponseTime: 2.3,
+      });
+    } catch (error) {
+      console.error("Error fetching dashboard stats:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchStats = async () => {
-      if (!propertyManager?.id) return;
-
-      try {
-        // Fetch overdue rent records
-        const { data: overdueRent } = await supabase
-          .from("rent_records")
-          .select("amount_due, late_fees")
-          .eq("property_manager_id", propertyManager.id)
-          .eq("status", "overdue");
-
-        // Fetch new maintenance requests
-        const { data: newRequests } = await supabase
-          .from("maintenance_requests")
-          .select("id")
-          .eq("property_manager_id", propertyManager.id)
-          .eq("status", "New");
-
-        // Fetch tenants
-        const { data: tenants } = await supabase
-          .from("tenants")
-          .select("id, lease_end_date, property_address")
-          .eq("property_manager_id", propertyManager.id);
-
-        // Calculate leases expiring in next 60 days
-        const today = new Date();
-        const sixtyDaysFromNow = new Date();
-        sixtyDaysFromNow.setDate(today.getDate() + 60);
-        
-        const leasesExpiringSoon = tenants?.filter(tenant => {
-          if (!tenant.lease_end_date) return false;
-          const leaseEndDate = new Date(tenant.lease_end_date);
-          return leaseEndDate >= today && leaseEndDate <= sixtyDaysFromNow;
-        }).length || 0;
-
-        // Calculate total overdue amount
-        const overdueAmount = overdueRent?.reduce((sum, record) => 
-          sum + (Number(record.amount_due) || 0) + (Number(record.late_fees) || 0), 0) || 0;
-
-        // Count unique properties
-        const uniqueProperties = new Set(tenants?.map(t => t.property_address) || []).size;
-
-        setStats({
-          overdueRentAmount: overdueAmount,
-          overdueTenantsCount: overdueRent?.length || 0,
-          newRequests: newRequests?.length || 0,
-          totalTenants: tenants?.length || 0,
-          leasesExpiringSoon,
-          totalProperties: uniqueProperties,
-          occupancyRate: 95,
-          avgResponseTime: 2.3,
-        });
-      } catch (error) {
-        console.error("Error fetching dashboard stats:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchStats();
   }, [propertyManager?.id]);
+
+  const refreshData = () => {
+    if (propertyManager?.id) {
+      fetchStats();
+    }
+  };
 
   const quickActions: QuickAction[] = [
     {
       title: "Add New Tenant",
       description: "Register a new tenant and lease",
       icon: Users,
-      action: () => console.log("Add tenant"),
+      action: () => setAddTenantOpen(true),
       variant: "default"
     },
     {
       title: "Record Payment",
       description: "Log rent payment received",
       icon: Receipt,
-      action: () => console.log("Record payment"),
+      action: () => setRecordPaymentOpen(true),
       variant: "success"
     },
     {
       title: "Create Maintenance Request",
       description: "New maintenance issue",
       icon: Wrench,
-      action: () => console.log("Create request"),
+      action: () => setNewMaintenanceOpen(true),
       variant: "warning"
     },
     {
       title: "Schedule Inspection",
       description: "Property inspection appointment",
       icon: Calendar,
-      action: () => console.log("Schedule inspection"),
+      action: () => console.log("Schedule inspection - coming soon!"),
       variant: "default"
     },
   ];
@@ -149,7 +163,7 @@ const Dashboard = () => {
             status={stats.overdueTenantsCount > 0 ? "critical" : "success"}
             trend={{ direction: 'down', percentage: 12 }}
             loading={loading}
-            onClick={() => console.log("Navigate to rent management")}
+            onClick={() => navigate("/rent")}
           />
 
           <MetricCard
@@ -159,7 +173,7 @@ const Dashboard = () => {
             status={stats.newRequests > 5 ? "critical" : stats.newRequests > 0 ? "warning" : "success"}
             trend={{ direction: 'up', percentage: 8 }}
             loading={loading}
-            onClick={() => console.log("Navigate to maintenance")}
+            onClick={() => navigate("/maintenance")}
           />
 
           <MetricCard
@@ -169,7 +183,7 @@ const Dashboard = () => {
             status={stats.leasesExpiringSoon > 2 ? "warning" : "success"}
             trend={{ direction: 'down', percentage: 5 }}
             loading={loading}
-            onClick={() => console.log("Navigate to lease management")}
+            onClick={() => navigate("/tenants")}
           />
 
           <MetricCard
@@ -179,7 +193,7 @@ const Dashboard = () => {
             status="neutral"
             trend={{ direction: 'up', percentage: 2 }}
             loading={loading}
-            onClick={() => console.log("Navigate to properties")}
+            onClick={() => navigate("/tenants")}
           />
 
           <MetricCard
@@ -189,7 +203,7 @@ const Dashboard = () => {
             status={stats.occupancyRate > 90 ? "success" : stats.occupancyRate > 80 ? "warning" : "critical"}
             trend={{ direction: 'up', percentage: 3 }}
             loading={loading}
-            onClick={() => console.log("Navigate to tenants")}
+            onClick={() => navigate("/tenants")}
           />
 
           <MetricCard
@@ -199,7 +213,7 @@ const Dashboard = () => {
             status={stats.avgResponseTime < 1 ? "success" : stats.avgResponseTime < 3 ? "warning" : "critical"}
             trend={{ direction: 'down', percentage: 15 }}
             loading={loading}
-            onClick={() => console.log("Navigate to performance")}
+            onClick={() => navigate("/maintenance")}
           />
         </div>
 
@@ -252,7 +266,7 @@ const Dashboard = () => {
                             ${stats.overdueRentAmount.toLocaleString()} total owed
                           </p>
                         </div>
-                        <Button size="sm" variant="destructive">
+                        <Button size="sm" variant="destructive" onClick={() => navigate("/rent")}>
                           View All
                         </Button>
                       </div>
@@ -269,7 +283,7 @@ const Dashboard = () => {
                             Review and assign priority
                           </p>
                         </div>
-                        <Button size="sm" variant="outline">
+                        <Button size="sm" variant="outline" onClick={() => navigate("/maintenance")}>
                           Review
                         </Button>
                       </div>
@@ -306,7 +320,7 @@ const Dashboard = () => {
                           {stats.leasesExpiringSoon} leases expiring soon
                         </p>
                       </div>
-                      <Button size="sm" variant="outline">
+                      <Button size="sm" variant="outline" onClick={() => navigate("/tenants")}>
                         Review
                       </Button>
                     </div>
@@ -329,6 +343,23 @@ const Dashboard = () => {
             </CardContent>
           </Card>
         </div>
+
+        {/* Dialogs */}
+        <AddTenantDialog
+          open={addTenantOpen}
+          onOpenChange={setAddTenantOpen}
+          onSuccess={refreshData}
+        />
+        <RecordPaymentDialog
+          open={recordPaymentOpen}
+          onOpenChange={setRecordPaymentOpen}
+          onSuccess={refreshData}
+        />
+        <NewMaintenanceRequestDialog
+          open={newMaintenanceOpen}
+          onOpenChange={setNewMaintenanceOpen}
+          onSuccess={refreshData}
+        />
       </div>
     </div>
   );

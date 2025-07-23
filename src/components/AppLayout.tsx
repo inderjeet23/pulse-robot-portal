@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Outlet, useLocation, NavLink } from "react-router-dom";
-import { LayoutDashboard, Wrench, DollarSign, Users, Settings, HelpCircle } from "lucide-react";
+import { LayoutDashboard, Wrench, DollarSign, Users, Settings, HelpCircle, BarChart3, FileText } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -19,11 +19,16 @@ import { BottomNav } from "@/components/BottomNav";
 import { GlobalCommandPalette } from "./GlobalCommandPalette";
 import { useCommandPalette } from "@/hooks/useCommandPalette";
 
-const navigation = [
+const mainNavigation = [
   {
     title: "Dashboard",
     url: "/",
     icon: LayoutDashboard,
+  },
+  {
+    title: "Tenants",
+    url: "/tenants",
+    icon: Users,
   },
   {
     title: "Maintenance",
@@ -35,11 +40,22 @@ const navigation = [
     url: "/rent",
     icon: DollarSign,
   },
+];
+
+const managementNavigation = [
   {
-    title: "Tenants",
-    url: "/tenants",
-    icon: Users,
+    title: "Analytics",
+    url: "/analytics",
+    icon: BarChart3,
   },
+  {
+    title: "Reports",
+    url: "/reports", 
+    icon: FileText,
+  },
+];
+
+const systemNavigation = [
   {
     title: "Setup & Config",
     url: "/setup",
@@ -75,12 +91,65 @@ export function AppLayout() {
     <SidebarProvider>
       <div className="min-h-screen flex w-full">
         <Sidebar className="hidden md:flex">
-          <SidebarContent>
+          <SidebarContent className="py-4">
+            {/* Core Operations */}
             <SidebarGroup>
-              <SidebarGroupLabel>Property Management</SidebarGroupLabel>
+              <SidebarGroupLabel>Core Operations</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {navigation.map((item) => (
+                  {mainNavigation.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <NavLink
+                          to={item.url}
+                          className={({ isActive }) =>
+                            isActive
+                              ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                              : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                          }
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            {/* Business Intelligence */}
+            <SidebarGroup>
+              <SidebarGroupLabel>Business Intelligence</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {managementNavigation.map((item) => (
+                    <SidebarMenuItem key={item.title}>
+                      <SidebarMenuButton asChild>
+                        <NavLink
+                          to={item.url}
+                          className={({ isActive }) =>
+                            isActive
+                              ? "bg-sidebar-accent text-sidebar-accent-foreground"
+                              : "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                          }
+                        >
+                          <item.icon className="h-4 w-4" />
+                          <span>{item.title}</span>
+                        </NavLink>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            {/* System & Support */}
+            <SidebarGroup>
+              <SidebarGroupLabel>System & Support</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {systemNavigation.map((item) => (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton asChild>
                         <NavLink
