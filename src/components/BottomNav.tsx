@@ -1,6 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { LayoutDashboard, Wrench, DollarSign, Users } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export const BottomNav = () => {
   const navItems = [
@@ -27,32 +27,31 @@ export const BottomNav = () => {
   ];
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-border md:hidden">
-      <nav className="flex items-center justify-around px-2 py-2">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            className={({ isActive }) =>
-              `flex flex-col items-center justify-center min-w-0 flex-1 ${
-                isActive ? "text-primary" : "text-muted-foreground"
-              }`
-            }
-          >
-            {({ isActive }) => (
-              <Button
-                variant="ghost"
-                size="sm"
-                className={`flex flex-col items-center justify-center h-12 w-full gap-1 p-1 ${
-                  isActive ? "text-primary bg-primary/10" : "text-muted-foreground"
-                }`}
-              >
-                <item.icon className="h-5 w-5" />
-                <span className="text-xs font-medium leading-none">{item.label}</span>
-              </Button>
-            )}
-          </NavLink>
-        ))}
+    <div className="fixed bottom-4 left-4 right-4 z-50 md:hidden">
+      <nav className="bg-background/80 backdrop-blur-lg border border-border/20 rounded-full shadow-lg px-2 py-3">
+        <div className="flex items-center justify-around">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={({ isActive }) =>
+                cn(
+                  "flex flex-col items-center justify-center px-3 py-2 rounded-full transition-all duration-200 min-w-0 flex-1",
+                  isActive 
+                    ? "bg-primary text-primary-foreground shadow-sm" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                )
+              }
+            >
+              {({ isActive }) => (
+                <>
+                  <item.icon className={cn("h-5 w-5 mb-1", isActive && "scale-110")} />
+                  <span className="text-xs font-medium leading-none">{item.label}</span>
+                </>
+              )}
+            </NavLink>
+          ))}
+        </div>
       </nav>
     </div>
   );

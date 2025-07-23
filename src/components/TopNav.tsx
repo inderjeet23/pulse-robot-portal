@@ -70,7 +70,7 @@ export function TopNav() {
   const isSecondaryActive = secondaryNavigation.some(item => item.url === location.pathname);
 
   return (
-    <nav className="border-b bg-background">
+    <nav className="border-b bg-background hidden md:block">
       <div className="container mx-auto px-4">
         <div className="flex items-center space-x-1 py-2">
           {/* Primary Navigation */}

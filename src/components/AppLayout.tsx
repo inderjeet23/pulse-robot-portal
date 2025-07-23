@@ -55,7 +55,7 @@ export function AppLayout() {
     <div className="min-h-screen bg-background">
       <Header title={currentTitle} />
       <TopNav />
-      <main className="container mx-auto px-4 py-8 space-y-6 max-w-7xl pb-20 md:pb-8">
+      <main className="container mx-auto px-2 py-4 space-y-4 max-w-7xl pb-24 md:px-4 md:py-8 md:space-y-6 md:pb-8">
         <Outlet context={{ newMaintenanceRequestOpen, setNewMaintenanceRequestOpen }} />
       </main>
       <BottomNav />
