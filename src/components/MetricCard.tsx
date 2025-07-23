@@ -3,55 +3,52 @@ import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 interface MetricCardProps {
-  title: string;
   value: string | number;
+  label: string;
   icon: LucideIcon;
   trend?: {
-    value: number;
-    label: string;
+    direction: 'up' | 'down';
+    percentage: number;
   };
-  status?: 'success' | 'warning' | 'error' | 'neutral';
+  status: 'critical' | 'warning' | 'success' | 'neutral';
   onClick?: () => void;
-  subtitle?: string;
   loading?: boolean;
 }
 
 const statusColors = {
-  success: 'text-success bg-success/10 hover:bg-success/20',
-  warning: 'text-warning bg-warning/10 hover:bg-warning/20',
-  error: 'text-error bg-error/10 hover:bg-error/20',
-  neutral: 'text-neutral bg-neutral/10 hover:bg-neutral/20'
+  critical: 'text-red-500 bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-800',
+  warning: 'text-amber-500 bg-amber-50 dark:bg-amber-950/20 border-amber-200 dark:border-amber-800',
+  success: 'text-emerald-500 bg-emerald-50 dark:bg-emerald-950/20 border-emerald-200 dark:border-emerald-800',
+  neutral: 'text-gray-500 bg-gray-50 dark:bg-gray-950/20 border-gray-200 dark:border-gray-800'
 };
 
 const statusIndicators = {
-  success: 'bg-success',
-  warning: 'bg-warning',
-  error: 'bg-error',
-  neutral: 'bg-neutral'
+  critical: 'bg-red-500 shadow-red-500/20',
+  warning: 'bg-amber-500 shadow-amber-500/20',
+  success: 'bg-emerald-500 shadow-emerald-500/20',
+  neutral: 'bg-gray-500 shadow-gray-500/20'
 };
 
 export function MetricCard({ 
-  title, 
   value, 
+  label, 
   icon: Icon, 
   trend, 
-  status = 'neutral',
+  status,
   onClick,
-  subtitle,
   loading = false
 }: MetricCardProps) {
   if (loading) {
     return (
-      <Card className="h-30 p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-elevated cursor-pointer">
-        <CardContent className="p-0">
-          <div className="flex items-center justify-between mb-4">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-muted to-muted/50 animate-shimmer"></div>
-            <div className="w-2 h-2 rounded-full bg-muted animate-shimmer"></div>
+      <Card className="h-32 p-6 cursor-pointer transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg">
+        <CardContent className="p-0 h-full flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <div className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
+            <div className="w-3 h-3 rounded-full bg-gray-200 dark:bg-gray-700 animate-pulse"></div>
           </div>
           <div className="space-y-2">
-            <div className="h-8 w-20 bg-muted rounded animate-shimmer"></div>
-            <div className="h-4 w-24 bg-muted rounded animate-shimmer"></div>
-            <div className="h-3 w-16 bg-muted rounded animate-shimmer"></div>
+            <div className="h-8 w-20 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
+            <div className="h-4 w-24 bg-gray-200 dark:bg-gray-700 animate-pulse rounded"></div>
           </div>
         </CardContent>
       </Card>
@@ -61,61 +58,49 @@ export function MetricCard({
   return (
     <Card 
       className={cn(
-        "h-30 p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-elevated group",
+        "h-32 p-6 transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg border-2",
+        statusColors[status],
         onClick && "cursor-pointer"
       )}
       onClick={onClick}
     >
-      <CardContent className="p-0">
+      <CardContent className="p-0 h-full flex flex-col justify-between">
         {/* Header with icon and status indicator */}
-        <div className="flex items-center justify-between mb-4">
-          <div className={cn(
-            "w-10 h-10 rounded-lg flex items-center justify-center transition-colors duration-200",
-            statusColors[status]
-          )}>
+        <div className="flex items-center justify-between">
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center bg-white dark:bg-gray-800 shadow-sm">
             <Icon className="w-5 h-5" />
           </div>
           <div className={cn(
-            "w-2 h-2 rounded-full",
+            "w-3 h-3 rounded-full",
             statusIndicators[status]
           )}></div>
         </div>
         
-        {/* Metric value */}
-        <div className="space-y-2">
-          <div className="font-mono text-3xl font-semibold text-foreground animate-count-up">
-            {value}
-          </div>
-          
-          {/* Title and subtitle */}
-          <div>
-            <div className="text-sm font-medium text-muted-foreground">
-              {title}
+        {/* Metric value and trend */}
+        <div className="space-y-1">
+          <div className="flex items-baseline gap-2">
+            <div className="text-2xl font-bold font-mono text-gray-900 dark:text-gray-100">
+              {value}
             </div>
-            {subtitle && (
-              <div className="text-xs text-muted-foreground mt-1">
-                {subtitle}
+            {trend && (
+              <div className="flex items-center gap-1">
+                {trend.direction === 'up' ? (
+                  <TrendingUp className="w-3 h-3 text-emerald-500" />
+                ) : (
+                  <TrendingDown className="w-3 h-3 text-red-500" />
+                )}
+                <span className={cn(
+                  "text-xs font-medium",
+                  trend.direction === 'up' ? "text-emerald-500" : "text-red-500"
+                )}>
+                  {trend.percentage}%
+                </span>
               </div>
             )}
           </div>
-          
-          {/* Trend indicator */}
-          {trend && (
-            <div className="flex items-center gap-1 text-xs">
-              {trend.value > 0 ? (
-                <TrendingUp className="w-3 h-3 text-success" />
-              ) : (
-                <TrendingDown className="w-3 h-3 text-error" />
-              )}
-              <span className={cn(
-                "font-medium",
-                trend.value > 0 ? "text-success" : "text-error"
-              )}>
-                {Math.abs(trend.value)}%
-              </span>
-              <span className="text-muted-foreground">{trend.label}</span>
-            </div>
-          )}
+          <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+            {label}
+          </div>
         </div>
       </CardContent>
     </Card>
