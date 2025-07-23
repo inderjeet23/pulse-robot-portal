@@ -13,6 +13,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { AddTenantDialog } from "@/components/AddTenantDialog";
 import { RecordPaymentDialog } from "@/components/RecordPaymentDialog";
 import { NewMaintenanceRequestDialog } from "@/components/NewMaintenanceRequestDialog";
+import { ComingSoonModal } from "@/components/ComingSoonModal";
 import { useNavigate } from "react-router-dom";
 
 interface DashboardStats {
@@ -55,6 +56,8 @@ const Dashboard = () => {
   const [addTenantOpen, setAddTenantOpen] = useState(false);
   const [recordPaymentOpen, setRecordPaymentOpen] = useState(false);
   const [newMaintenanceOpen, setNewMaintenanceOpen] = useState(false);
+  const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
+  const [comingSoonFeature, setComingSoonFeature] = useState("");
 
   const fetchStats = async () => {
     if (!propertyManager?.id) return;
@@ -498,7 +501,14 @@ const Dashboard = () => {
                         Due in 5 days
                       </p>
                     </div>
-                    <Button size="sm" variant="outline">
+                    <Button 
+                      size="sm" 
+                      variant="outline"
+                      onClick={() => {
+                        setComingSoonFeature("Report generation");
+                        setIsComingSoonOpen(true);
+                      }}
+                    >
                       Generate
                     </Button>
                   </div>
@@ -523,6 +533,11 @@ const Dashboard = () => {
           open={newMaintenanceOpen}
           onOpenChange={setNewMaintenanceOpen}
           onSuccess={refreshData}
+        />
+        <ComingSoonModal 
+          open={isComingSoonOpen}
+          onOpenChange={setIsComingSoonOpen}
+          feature={comingSoonFeature}
         />
     </div>
   );

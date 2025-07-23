@@ -10,10 +10,10 @@ const MaintenancePage = () => {
   const context = useOutletContext<OutletContext>();
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4 md:space-y-6 px-2 md:px-0">
       <div>
-        <h1 className="text-3xl font-bold">Maintenance Requests</h1>
-        <p className="text-muted-foreground">Manage and track all maintenance requests from tenants</p>
+        <h1 className="text-2xl md:text-3xl font-bold">Maintenance Requests</h1>
+        <p className="text-muted-foreground text-sm md:text-base">Manage and track all maintenance requests from tenants</p>
       </div>
       <RequestsOverview 
         newRequestDialogOpen={context?.newMaintenanceRequestOpen}

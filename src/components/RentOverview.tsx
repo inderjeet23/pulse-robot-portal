@@ -16,6 +16,7 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { ComingSoonModal } from "@/components/ComingSoonModal";
 interface RentRecord {
   id: string;
   tenant_id: string;
@@ -63,6 +64,8 @@ export const RentOverview = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [selectedRecords, setSelectedRecords] = useState<Set<string>>(new Set());
   const [isPaymentDialogOpen, setIsPaymentDialogOpen] = useState(false);
+  const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
+  const [comingSoonFeature, setComingSoonFeature] = useState("");
   const [paymentFormData, setPaymentFormData] = useState({
     tenant_id: "",
     amount: "",
@@ -332,7 +335,7 @@ export const RentOverview = () => {
                     Log Payment
                   </Button>
                 </DialogTrigger>
-                <DialogContent>
+                <DialogContent className="max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Log Offline Payment</DialogTitle>
                     <DialogDescription>
@@ -398,7 +401,7 @@ export const RentOverview = () => {
                       notes: e.target.value
                     })} rows={2} />
                     </div>
-                    <div className="flex justify-end gap-2">
+                    <div className="flex justify-end gap-2 pt-4 border-t sticky bottom-0 bg-background">
                       <Button variant="outline" onClick={() => setIsPaymentDialogOpen(false)}>
                         Cancel
                       </Button>
@@ -515,9 +518,18 @@ export const RentOverview = () => {
                               {(record.status === 'pending' || record.status === 'overdue') && <DropdownMenuItem onClick={() => markAsPaid(record.id, record.amount_due)}>
                                   Mark as Paid
                                 </DropdownMenuItem>}
-                              {record.status === 'overdue' && <DropdownMenuItem>Send Notice</DropdownMenuItem>}
-                              <DropdownMenuItem>View Details</DropdownMenuItem>
-                              <DropdownMenuItem>Edit Record</DropdownMenuItem>
+                              {record.status === 'overdue' && <DropdownMenuItem onClick={() => {
+                                setComingSoonFeature("Legal notices");
+                                setIsComingSoonOpen(true);
+                              }}>Send Notice</DropdownMenuItem>}
+                              <DropdownMenuItem onClick={() => {
+                                setComingSoonFeature("Rent record details");
+                                setIsComingSoonOpen(true);
+                              }}>View Details</DropdownMenuItem>
+                              <DropdownMenuItem onClick={() => {
+                                setComingSoonFeature("Edit rent records");
+                                setIsComingSoonOpen(true);
+                              }}>Edit Record</DropdownMenuItem>
                               {record.tenants.phone && <DropdownMenuItem onClick={() => window.open(`tel:${record.tenants.phone}`)}>
                                   Call Tenant
                                 </DropdownMenuItem>}
@@ -532,5 +544,11 @@ export const RentOverview = () => {
         </Tabs>
       </CardContent>
     </Card>
+    
+    <ComingSoonModal 
+      open={isComingSoonOpen}
+      onOpenChange={setIsComingSoonOpen}
+      feature={comingSoonFeature}
+    />
     </div>;
 };
