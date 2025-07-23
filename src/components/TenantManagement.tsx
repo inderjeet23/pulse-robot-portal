@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { TenantCardList } from "@/components/TenantCardList";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Users, Plus, Mail, Phone, MapPin, DollarSign, Search, Filter, MoreVertical, Eye, Edit, Trash2, Calendar, FileText } from "lucide-react";
@@ -400,112 +401,124 @@ export const TenantManagement = () => {
             No tenants match your search criteria. Try adjusting your filters.
           </div>
         ) : (
-          <div className="border rounded-lg">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Tenant</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Property</TableHead>
-                  <TableHead>Rent</TableHead>
-                  <TableHead>Lease Status</TableHead>
-                  <TableHead className="w-12">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {filteredTenants.map((tenant) => {
-                  const leaseStatus = getLeaseStatus(tenant);
-                  return (
-                    <TableRow 
-                      key={tenant.id} 
-                      className="cursor-pointer hover:bg-muted/50"
-                      onClick={() => handleViewDetails(tenant)}
-                    >
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">{tenant.name}</div>
-                          {tenant.unit_number && (
-                            <div className="text-sm text-muted-foreground">
-                              Unit {tenant.unit_number}
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="space-y-1">
-                          {tenant.email && (
-                            <div className="flex items-center gap-1 text-sm">
-                              <Mail className="h-3 w-3" />
-                              {tenant.email}
-                            </div>
-                          )}
-                          {tenant.phone && (
-                            <div className="flex items-center gap-1 text-sm">
-                              <Phone className="h-3 w-3" />
-                              {tenant.phone}
-                            </div>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex items-start gap-1">
-                          <MapPin className="h-3 w-3 mt-0.5 text-muted-foreground" />
-                          <span className="text-sm">{tenant.property_address}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <div>
-                          <div className="font-medium">${tenant.rent_amount.toLocaleString()}</div>
-                          <div className="text-sm text-muted-foreground">
-                            Due {tenant.rent_due_date}{tenant.rent_due_date === 1 ? 'st' : tenant.rent_due_date === 2 ? 'nd' : tenant.rent_due_date === 3 ? 'rd' : 'th'}
+          <>
+            {/* Desktop Table - Hidden on mobile */}
+            <div className="hidden sm:block border rounded-lg">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Tenant</TableHead>
+                    <TableHead>Contact</TableHead>
+                    <TableHead>Property</TableHead>
+                    <TableHead>Rent</TableHead>
+                    <TableHead>Lease Status</TableHead>
+                    <TableHead className="w-12">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredTenants.map((tenant) => {
+                    const leaseStatus = getLeaseStatus(tenant);
+                    return (
+                      <TableRow 
+                        key={tenant.id} 
+                        className="cursor-pointer hover:bg-muted/50"
+                        onClick={() => handleViewDetails(tenant)}
+                      >
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">{tenant.name}</div>
+                            {tenant.unit_number && (
+                              <div className="text-sm text-muted-foreground">
+                                Unit {tenant.unit_number}
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={leaseStatus.variant}>
-                          {leaseStatus.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem onClick={(e) => {
-                              e.stopPropagation();
-                              handleViewDetails(tenant);
-                            }}>
-                              <Eye className="mr-2 h-4 w-4" />
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={(e) => {
-                              e.stopPropagation();
-                              // TODO: Implement edit functionality
-                              toast({ title: "Coming Soon", description: "Edit functionality will be available soon." });
-                            }}>
-                              <Edit className="mr-2 h-4 w-4" />
-                              Edit Tenant
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={(e) => {
-                              e.stopPropagation();
-                              // TODO: Implement delete functionality
-                              toast({ title: "Coming Soon", description: "Delete functionality will be available soon." });
-                            }}>
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete Tenant
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="space-y-1">
+                            {tenant.email && (
+                              <div className="flex items-center gap-1 text-sm">
+                                <Mail className="h-3 w-3" />
+                                {tenant.email}
+                              </div>
+                            )}
+                            {tenant.phone && (
+                              <div className="flex items-center gap-1 text-sm">
+                                <Phone className="h-3 w-3" />
+                                {tenant.phone}
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-start gap-1">
+                            <MapPin className="h-3 w-3 mt-0.5 text-muted-foreground" />
+                            <span className="text-sm">{tenant.property_address}</span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <div>
+                            <div className="font-medium">${tenant.rent_amount.toLocaleString()}</div>
+                            <div className="text-sm text-muted-foreground">
+                              Due {tenant.rent_due_date}{tenant.rent_due_date === 1 ? 'st' : tenant.rent_due_date === 2 ? 'nd' : tenant.rent_due_date === 3 ? 'rd' : 'th'}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={leaseStatus.variant}>
+                            {leaseStatus.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                                <MoreVertical className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={(e) => {
+                                e.stopPropagation();
+                                handleViewDetails(tenant);
+                              }}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                View Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={(e) => {
+                                e.stopPropagation();
+                                // TODO: Implement edit functionality
+                                toast({ title: "Coming Soon", description: "Edit functionality will be available soon." });
+                              }}>
+                                <Edit className="mr-2 h-4 w-4" />
+                                Edit Tenant
+                              </DropdownMenuItem>
+                              <DropdownMenuItem onClick={(e) => {
+                                e.stopPropagation();
+                                // TODO: Implement delete functionality
+                                toast({ title: "Coming Soon", description: "Delete functionality will be available soon." });
+                              }}>
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete Tenant
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </div>
+
+            {/* Mobile Card List - Visible only on mobile */}
+            <div className="block sm:hidden">
+              <TenantCardList 
+                tenants={filteredTenants}
+                onViewDetails={handleViewDetails}
+                getLeaseStatus={getLeaseStatus}
+              />
+            </div>
+          </>
         )}
 
         {/* Tenant Details Sheet */}
