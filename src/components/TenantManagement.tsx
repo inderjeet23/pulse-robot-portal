@@ -11,6 +11,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { TenantCardList } from "@/components/TenantCardList";
+import { EditTenantDialog } from "@/components/EditTenantDialog";
+import { DeleteTenantDialog } from "@/components/DeleteTenantDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Users, Plus, Mail, Phone, MapPin, DollarSign, Search, Filter, MoreVertical, Eye, Edit, Trash2, Calendar, FileText } from "lucide-react";
@@ -42,6 +44,8 @@ export const TenantManagement = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedTenant, setSelectedTenant] = useState<Tenant | null>(null);
   const [isDetailSheetOpen, setIsDetailSheetOpen] = useState(false);
+  const [editTenant, setEditTenant] = useState<Tenant | null>(null);
+  const [deleteTenant, setDeleteTenant] = useState<Tenant | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [formData, setFormData] = useState({
@@ -486,16 +490,14 @@ export const TenantManagement = () => {
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={(e) => {
                                 e.stopPropagation();
-                                // TODO: Implement edit functionality
-                                toast({ title: "Coming Soon", description: "Edit functionality will be available soon." });
+                                setEditTenant(tenant);
                               }}>
                                 <Edit className="mr-2 h-4 w-4" />
                                 Edit Tenant
                               </DropdownMenuItem>
                               <DropdownMenuItem onClick={(e) => {
                                 e.stopPropagation();
-                                // TODO: Implement delete functionality
-                                toast({ title: "Coming Soon", description: "Delete functionality will be available soon." });
+                                setDeleteTenant(tenant);
                               }}>
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 Delete Tenant
@@ -515,6 +517,7 @@ export const TenantManagement = () => {
               <TenantCardList 
                 tenants={filteredTenants}
                 onViewDetails={handleViewDetails}
+                onTenantUpdate={fetchTenants}
                 getLeaseStatus={getLeaseStatus}
               />
             </div>
@@ -634,6 +637,21 @@ export const TenantManagement = () => {
             )}
           </SheetContent>
         </Sheet>
+
+        {/* Edit and Delete Dialogs */}
+        <EditTenantDialog
+          open={!!editTenant}
+          onOpenChange={(open) => !open && setEditTenant(null)}
+          tenant={editTenant}
+          onSuccess={fetchTenants}
+        />
+        
+        <DeleteTenantDialog
+          open={!!deleteTenant}
+          onOpenChange={(open) => !open && setDeleteTenant(null)}
+          tenant={deleteTenant}
+          onSuccess={fetchTenants}
+        />
       </CardContent>
     </Card>
   );
