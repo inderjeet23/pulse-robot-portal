@@ -38,11 +38,6 @@ const mainNavigation = [
 
 const analyticsNavigation = [
   {
-    title: "Analytics",
-    url: "/analytics",
-    icon: BarChart3,
-  },
-  {
     title: "Reports",
     url: "/reports",
     icon: FileText,
