@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +16,7 @@ interface PayOrQuitNoticeProps {
   amountOwed: number;
   daysToQuit?: number;
   onNoticeGenerated?: () => void;
+  existingNoticeId?: string; // Add this prop to handle viewing existing notices
 }
 
 interface NoticeData {
@@ -39,7 +40,8 @@ export const PayOrQuitNotice = ({
   rentRecordId,
   amountOwed,
   daysToQuit = 30, // Default to 30 days for New Jersey
-  onNoticeGenerated
+  onNoticeGenerated,
+  existingNoticeId
 }: PayOrQuitNoticeProps) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isSending, setIsSending] = useState(false);
@@ -51,6 +53,54 @@ export const PayOrQuitNotice = ({
   });
   const [showEmailForm, setShowEmailForm] = useState(false);
   const { toast } = useToast();
+
+  // Load existing notice if existingNoticeId is provided
+  const loadExistingNotice = async () => {
+    if (!existingNoticeId) return;
+    
+    try {
+      const { data: existingNotice, error } = await supabase
+        .from('legal_notices')
+        .select(`
+          *,
+          tenant:tenants(*),
+          propertyManager:property_managers(*),
+          rentRecord:rent_records(*)
+        `)
+        .eq('id', existingNoticeId)
+        .single();
+
+      if (error) throw error;
+      
+      if (existingNotice) {
+        setNotice({
+          ...existingNotice,
+          tenant: existingNotice.tenant,
+          propertyManager: existingNotice.propertyManager,
+          rentRecord: existingNotice.rentRecord
+        });
+        
+        // Pre-fill email form
+        if (existingNotice.tenant?.email) {
+          setEmailForm(prev => ({ ...prev, to: existingNotice.tenant.email }));
+        }
+      }
+    } catch (error) {
+      console.error('Error loading existing notice:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load existing notice.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Load existing notice on component mount if existingNoticeId is provided
+  useEffect(() => {
+    if (existingNoticeId) {
+      loadExistingNotice();
+    }
+  }, [existingNoticeId]);
 
   const generateNotice = async () => {
     setIsGenerating(true);

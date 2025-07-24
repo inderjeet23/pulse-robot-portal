@@ -213,6 +213,7 @@ const LegalNoticesPage = () => {
                           amountOwed={selectedNotice.amount_owed}
                           daysToQuit={selectedNotice.days_to_pay}
                           onNoticeGenerated={fetchNotices}
+                          existingNoticeId={selectedNotice.id}
                         />
                       )}
                     </DialogContent>
