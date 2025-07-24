@@ -18,6 +18,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { RentCardList } from "@/components/RentCardList";
 import { ComingSoonModal } from "@/components/ComingSoonModal";
+import { PayOrQuitNotice } from "@/components/PayOrQuitNotice";
+import { InspectionDialog } from "@/components/InspectionDialog";
 interface RentRecord {
   id: string;
   tenant_id: string;
