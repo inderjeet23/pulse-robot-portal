@@ -8,6 +8,8 @@ import { useCommandPalette } from "@/hooks/useCommandPalette";
 import { WelcomeModal } from "@/components/WelcomeModal";
 import { SetupWizard } from "@/components/SetupWizard";
 import { useAuth } from "@/contexts/AuthContext";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
 
 const pageTitles: Record<string, string> = {
   "/": "Dashboard",
@@ -52,28 +54,54 @@ export function AppLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <Header title={currentTitle} />
-      <TopNav />
-      <main className="container mx-auto px-2 py-4 space-y-4 max-w-7xl pb-24 md:px-4 md:py-8 md:space-y-6 md:pb-8">
-        <Outlet context={{ newMaintenanceRequestOpen, setNewMaintenanceRequestOpen }} />
-      </main>
-      <BottomNav />
-      <GlobalCommandPalette 
-        open={open} 
-        onOpenChange={setOpen}
-        onNewMaintenanceRequest={handleNewMaintenanceRequest}
-      />
-      
-      {/* Onboarding Modals */}
-      <WelcomeModal 
-        open={showWelcomeModal} 
-        onSetupProperty={handleSetupProperty}
-      />
-      <SetupWizard 
-        open={showSetupWizard} 
-        onComplete={handleOnboardingComplete}
-      />
-    </div>
+    <SidebarProvider>
+      <div className="min-h-screen w-full bg-background">
+        {/* Mobile Header with TopNav */}
+        <div className="md:hidden">
+          <Header title={currentTitle} />
+          <TopNav />
+        </div>
+
+        {/* Desktop Layout with Sidebar */}
+        <div className="hidden md:flex min-h-screen w-full">
+          <AppSidebar />
+          
+          <div className="flex-1 flex flex-col">
+            {/* Desktop Header */}
+            <header className="h-12 flex items-center border-b bg-background px-4">
+              <SidebarTrigger className="mr-4" />
+              <h1 className="text-lg font-semibold">{currentTitle}</h1>
+            </header>
+            
+            {/* Main Content */}
+            <main className="flex-1 container mx-auto px-4 py-6 space-y-6 max-w-7xl">
+              <Outlet context={{ newMaintenanceRequestOpen, setNewMaintenanceRequestOpen }} />
+            </main>
+          </div>
+        </div>
+
+        {/* Mobile Content */}
+        <main className="md:hidden container mx-auto px-2 py-4 space-y-4 max-w-7xl pb-24">
+          <Outlet context={{ newMaintenanceRequestOpen, setNewMaintenanceRequestOpen }} />
+        </main>
+
+        <BottomNav />
+        <GlobalCommandPalette 
+          open={open} 
+          onOpenChange={setOpen}
+          onNewMaintenanceRequest={handleNewMaintenanceRequest}
+        />
+        
+        {/* Onboarding Modals */}
+        <WelcomeModal 
+          open={showWelcomeModal} 
+          onSetupProperty={handleSetupProperty}
+        />
+        <SetupWizard 
+          open={showSetupWizard} 
+          onComplete={handleOnboardingComplete}
+        />
+      </div>
+    </SidebarProvider>
   );
 }
