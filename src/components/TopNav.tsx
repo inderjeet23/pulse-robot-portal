@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Wrench, DollarSign, Users, Settings, HelpCircle, BarChart3, FileText, MoreHorizontal } from "lucide-react";
+import { LayoutDashboard, Wrench, DollarSign, Users, Settings, HelpCircle, BarChart3, FileText, MoreHorizontal, Scale } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -132,6 +132,20 @@ export function TopNav() {
                 >
                   <FileText className="w-4 h-4 mr-2" />
                   Reports
+                </NavLink>
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <NavLink
+                  to="/legal-notices"
+                  className={({ isActive }) =>
+                    cn(
+                      "flex items-center px-2 py-1.5 text-sm cursor-pointer",
+                      isActive && "bg-accent text-accent-foreground"
+                    )
+                  }
+                >
+                  <Scale className="w-4 h-4 mr-2" />
+                  Legal Notices
                 </NavLink>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
