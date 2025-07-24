@@ -1,4 +1,4 @@
-import { RentOverview } from "@/components/RentOverview";
+import { EnhancedRentOverview } from "@/components/EnhancedRentOverview";
 
 const RentPage = () => {
   return (
@@ -7,7 +7,7 @@ const RentPage = () => {
         <h1 className="text-2xl md:text-3xl font-bold">Rent Management</h1>
         <p className="text-muted-foreground text-sm md:text-base">Track rent payments, overdue accounts, and send notices</p>
       </div>
-      <RentOverview />
+      <EnhancedRentOverview />
     </div>
   );
 };
