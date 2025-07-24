@@ -68,14 +68,41 @@ export const PayOrQuitNotice = ({
         .eq('id', tenantId)
         .single();
 
-      const { data: rentRecord } = await supabase
-        .from('rent_records')
-        .select('*')
-        .eq('id', rentRecordId)
-        .single();
-
       if (!propertyManager || !tenant) {
         throw new Error('Failed to fetch required data');
+      }
+
+      let actualRentRecordId = rentRecordId;
+      let rentRecord = null;
+
+      // If this is a temporary record (starts with "temp-"), create a real one
+      if (rentRecordId.startsWith('temp-')) {
+        // Create a real rent record for the overdue amount
+        const { data: newRentRecord, error: rentError } = await supabase
+          .from('rent_records')
+          .insert({
+            property_manager_id: propertyManager.id,
+            tenant_id: tenantId,
+            amount_due: amountOwed,
+            amount_paid: 0,
+            due_date: new Date().toISOString().split('T')[0], // Today's date as due date
+            status: 'overdue',
+            late_fees: 0
+          })
+          .select()
+          .single();
+
+        if (rentError) throw rentError;
+        actualRentRecordId = newRentRecord.id;
+        rentRecord = newRentRecord;
+      } else {
+        // Fetch existing rent record
+        const { data: existingRentRecord } = await supabase
+          .from('rent_records')
+          .select('*')
+          .eq('id', rentRecordId)
+          .single();
+        rentRecord = existingRentRecord;
       }
 
       // Create legal notice record
@@ -83,7 +110,7 @@ export const PayOrQuitNotice = ({
         .from('legal_notices')
         .insert({
           tenant_id: tenantId,
-          rent_record_id: rentRecordId,
+          rent_record_id: actualRentRecordId,
           property_manager_id: propertyManager.id,
           notice_type: 'pay_or_quit',
           state: 'NJ', // New Jersey
