@@ -504,10 +504,7 @@ const Dashboard = () => {
                     <Button 
                       size="sm" 
                       variant="outline"
-                      onClick={() => {
-                        setComingSoonFeature("Report generation");
-                        setIsComingSoonOpen(true);
-                      }}
+                      onClick={() => navigate("/reports")}
                     >
                       Generate
                     </Button>
