@@ -1,5 +1,4 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Wrench, DollarSign, Users, Settings, HelpCircle, BarChart3, FileText, Scale, Zap } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -12,60 +11,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
-
-const mainNavigation = [
-  {
-    title: "Dashboard",
-    url: "/",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Tenants",
-    url: "/tenants",
-    icon: Users,
-  },
-  {
-    title: "Maintenance",
-    url: "/maintenance",
-    icon: Wrench,
-  },
-  {
-    title: "Rent",
-    url: "/rent",
-    icon: DollarSign,
-  },
-  {
-    title: "Automation",
-    url: "/automation",
-    icon: Zap,
-  },
-];
-
-const analyticsNavigation = [
-  {
-    title: "Reports",
-    url: "/reports",
-    icon: FileText,
-  },
-  {
-    title: "Legal Notices",
-    url: "/legal-notices",
-    icon: Scale,
-  },
-];
-
-const systemNavigation = [
-  {
-    title: "Setup & Config",
-    url: "/setup",
-    icon: Settings,
-  },
-  {
-    title: "FAQ & Support",
-    url: "/faq",
-    icon: HelpCircle,
-  },
-];
+import { mainNavigation, analyticsNavigation, systemNavigation } from "@/config/navigation";
 
 export function AppSidebar() {
   const { state } = useSidebar();
