@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Wrench, DollarSign, Users, Settings, HelpCircle, BarChart3, FileText, Scale } from "lucide-react";
+import { LayoutDashboard, Wrench, DollarSign, Users, Settings, HelpCircle, BarChart3, FileText, Scale, Zap } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -33,6 +33,11 @@ const mainNavigation = [
     title: "Rent",
     url: "/rent",
     icon: DollarSign,
+  },
+  {
+    title: "Automation",
+    url: "/automation",
+    icon: Zap,
   },
 ];
 
