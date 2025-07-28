@@ -117,18 +117,18 @@ export const WorkflowCreator = () => {
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Visual Flow Indicator */}
-          <div className="flex items-center justify-center gap-4 py-4 bg-muted/30 rounded-lg">
-            <div className="flex items-center gap-2 text-sm font-medium">
+          <div className="flex flex-col md:flex-row gap-4 py-4 bg-muted/30 rounded-lg">
+            <div className="flex items-center gap-2 text-base md:text-xl font-medium">
               <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded">IF</span>
               Trigger
             </div>
             <ArrowRight className="h-4 w-4 text-muted-foreground" />
-            <div className="flex items-center gap-2 text-sm font-medium">
+            <div className="flex items-center gap-2 text-base md:text-xl font-medium">
               <span className="bg-orange-100 text-orange-700 px-2 py-1 rounded">AND IF</span>
               Condition
             </div>
             <ArrowRight className="h-4 w-4 text-muted-foreground" />
-            <div className="flex items-center gap-2 text-sm font-medium">
+            <div className="flex items-center gap-2 text-base md:text-xl font-medium">
               <span className="bg-green-100 text-green-700 px-2 py-1 rounded">THEN</span>
               Action
             </div>

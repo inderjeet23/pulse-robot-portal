@@ -104,7 +104,7 @@ export function MetricCard({
                   </div>
                 )}
               </div>
-              <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+              <div className="text-sm md:text-lg font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
                 {label}
               </div>
             </div>
