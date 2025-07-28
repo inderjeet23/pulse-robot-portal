@@ -63,7 +63,7 @@ export function AppLayout() {
         </div>
 
         {/* Desktop Layout with Sidebar */}
-        <div className="hidden md:flex min-h-screen w-full">
+        <div className="hidden md:block min-h-screen w-full">
           <AppSidebar />
           
           <div className="flex-1 flex flex-col">
