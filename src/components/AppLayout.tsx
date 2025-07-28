@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Outlet, useLocation } from "react-router-dom";
 import { Header } from "@/components/Header";
 import { TopNav } from "@/components/TopNav";
-import { BottomNav } from "@/components/BottomNav";
+
 import { GlobalCommandPalette } from "./GlobalCommandPalette";
 import { useCommandPalette } from "@/hooks/useCommandPalette";
 import { WelcomeModal } from "@/components/WelcomeModal";
@@ -85,7 +85,7 @@ export function AppLayout() {
           <Outlet context={{ newMaintenanceRequestOpen, setNewMaintenanceRequestOpen }} />
         </main>
 
-        <BottomNav />
+        
         <GlobalCommandPalette 
           open={open} 
           onOpenChange={setOpen}
