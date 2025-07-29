@@ -16,6 +16,7 @@ import { RecordPaymentDialog } from "@/components/RecordPaymentDialog";
 import { NewMaintenanceRequestDialog } from "@/components/NewMaintenanceRequestDialog";
 import { ComingSoonModal } from "@/components/ComingSoonModal";
 import { useNavigate } from "react-router-dom";
+import { EnhancedRentOverview } from "@/components/EnhancedRentOverview";
 
 interface DashboardStats {
   overdueRentAmount: number;
