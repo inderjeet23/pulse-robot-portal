@@ -3,8 +3,7 @@ import { NavLink, useLocation } from "react-router-dom";
 import { MoreHorizontal, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { AppSidebar } from "@/components/AppSidebar";
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import { mainNavigation, analyticsNavigation, systemNavigation } from "@/config/navigation";
 
@@ -35,8 +34,92 @@ export function TopNav() {
                 <span className="sr-only">Toggle Navigation</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="p-0">
-              <AppSidebar />
+            <SheetContent side="left" className="p-6">
+              <SheetHeader>
+                <SheetTitle>Navigation</SheetTitle>
+              </SheetHeader>
+              <div className="mt-6 space-y-6">
+                {/* Main Navigation */}
+                <div>
+                  <h3 className="text-sm font-medium text-muted-foreground mb-3">Main</h3>
+                  <div className="space-y-1">
+                    {mainNavigation.map((item) => {
+                      const isActive = location.pathname === item.url;
+                      return (
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className={({ isActive }) =>
+                            cn(
+                              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                              isActive
+                                ? "bg-accent text-accent-foreground font-medium"
+                                : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                            )
+                          }
+                        >
+                          <item.icon className="h-4 w-4" />
+                          {item.title}
+                        </NavLink>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Business Intelligence */}
+                <div>
+                  <h3 className="text-sm font-medium text-muted-foreground mb-3">Business Intelligence</h3>
+                  <div className="space-y-1">
+                    {analyticsNavigation.map((item) => {
+                      const isActive = location.pathname === item.url;
+                      return (
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className={({ isActive }) =>
+                            cn(
+                              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                              isActive
+                                ? "bg-accent text-accent-foreground font-medium"
+                                : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                            )
+                          }
+                        >
+                          <item.icon className="h-4 w-4" />
+                          {item.title}
+                        </NavLink>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* System & Support */}
+                <div>
+                  <h3 className="text-sm font-medium text-muted-foreground mb-3">System & Support</h3>
+                  <div className="space-y-1">
+                    {systemNavigation.map((item) => {
+                      const isActive = location.pathname === item.url;
+                      return (
+                        <NavLink
+                          key={item.title}
+                          to={item.url}
+                          className={({ isActive }) =>
+                            cn(
+                              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                              isActive
+                                ? "bg-accent text-accent-foreground font-medium"
+                                : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+                            )
+                          }
+                        >
+                          <item.icon className="h-4 w-4" />
+                          {item.title}
+                        </NavLink>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
             </SheetContent>
           </Sheet>
 
