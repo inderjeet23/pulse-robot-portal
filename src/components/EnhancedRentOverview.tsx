@@ -17,6 +17,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { PayOrQuitNotice } from "@/components/PayOrQuitNotice";
+import { useNavigate } from "react-router-dom";
 
 interface RentRecord {
   id: string;
@@ -274,7 +275,14 @@ export const EnhancedRentOverview = ({ rentFilter }: { rentFilter: string | null
     return differenceInDays(new Date(), parseISO(dueDate));
   };
 
-  const filteredRecords = rentRecords.filter(record => {
+  const filteredTenants = rentRecords.filter(record => {
+    if (rentFilter === 'overdue') {
+      return record.status === 'overdue';
+    }
+    return true;
+  });
+
+  const filteredRecords = filteredTenants.filter(record => {
     if (activeTab === "all") return true;
     return record.status === activeTab;
   });

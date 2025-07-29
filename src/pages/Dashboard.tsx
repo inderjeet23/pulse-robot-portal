@@ -60,6 +60,7 @@ const Dashboard = () => {
   const [newMaintenanceOpen, setNewMaintenanceOpen] = useState(false);
   const [isComingSoonOpen, setIsComingSoonOpen] = useState(false);
   const [comingSoonFeature, setComingSoonFeature] = useState("");
+  const [rentFilter, setRentFilter] = useState<string | null>(null);
 
   const fetchStats = async () => {
     if (!propertyManager?.id) return;
