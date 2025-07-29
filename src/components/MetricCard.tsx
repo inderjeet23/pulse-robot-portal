@@ -85,7 +85,7 @@ export function MetricCard({
             {/* Metric value and trend */}
             <div className="space-y-1">
               <div className="flex items-baseline gap-2">
-                <div className="text-2xl font-bold font-mono text-gray-900 dark:text-gray-100">
+                <div className="text-xl font-bold font-mono text-gray-900 dark:text-gray-100">
                   {value}
                 </div>
                 {trend && (
@@ -104,7 +104,7 @@ export function MetricCard({
                   </div>
                 )}
               </div>
-              <div className="text-sm md:text-lg font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+              <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
                 {label}
               </div>
             </div>

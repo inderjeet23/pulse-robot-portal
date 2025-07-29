@@ -63,7 +63,7 @@ export function CompactKPI({
           </span>
         )}
       </div>
-      <div className="text-lg font-bold leading-none mb-1">
+      <div className="text-base font-bold leading-none mb-1">
         {value}
       </div>
       <div className="text-xs opacity-70 leading-none">
