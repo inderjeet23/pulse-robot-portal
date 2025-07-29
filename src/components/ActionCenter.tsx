@@ -7,10 +7,18 @@ interface ActionCenterProps {
 
 export function ActionCenter({ overdueCount, maintenanceCount }: ActionCenterProps) {
   return (
-    <Card>
+    <Card className="w-full">
       <CardHeader>
         <CardTitle className="text-base">
-          You have <a href="#" className="font-bold text-red-500">{overdueCount} tenants overdue</a> and <a href="#" className="font-bold text-blue-500">{maintenanceCount} new maintenance requests</a>.
+          You have{" "}
+          <a href="#" className="text-blue-600 hover:underline">
+            {overdueCount} tenants overdue
+          </a>{" "}
+          and{" "}
+          <a href="#" className="text-blue-600 hover:underline">
+            {maintenanceCount} new maintenance requests
+          </a>
+          .
         </CardTitle>
       </CardHeader>
     </Card>
