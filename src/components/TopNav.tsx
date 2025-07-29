@@ -1,25 +1,12 @@
 
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Wrench, DollarSign, Users, Settings, HelpCircle, BarChart3, FileText, MoreHorizontal, Scale, Menu } from "lucide-react";
+import { MoreHorizontal, Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { AppSidebar } from "@/components/AppSidebar";
 import { cn } from "@/lib/utils";
-
-const primaryNavigation = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Tenants", url: "/tenants", icon: Users },
-  { title: "Maintenance", url: "/maintenance", icon: Wrench },
-  { title: "Rent", url: "/rent", icon: DollarSign },
-];
-
-const secondaryNavigation = [
-  { title: "Analytics", url: "/analytics", icon: BarChart3 },
-  { title: "Reports", url: "/reports", icon: FileText },
-  { title: "Setup & Config", url: "/setup", icon: Settings },
-  { title: "FAQ", url: "/faq", icon: HelpCircle },
-];
+import { mainNavigation, analyticsNavigation, systemNavigation } from "@/config/navigation";
 
 export function TopNav() {
   const location = useLocation();
@@ -31,7 +18,8 @@ export function TopNav() {
         : "text-muted-foreground hover:text-foreground hover:bg-muted"
     );
 
-  const isSecondaryActive = secondaryNavigation.some(
+  const allSecondaryNavigation = [...analyticsNavigation, ...systemNavigation];
+  const isSecondaryActive = allSecondaryNavigation.some(
     (item) => item.url === location.pathname
   );
 
@@ -55,7 +43,7 @@ export function TopNav() {
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center space-x-1">
             {/* Primary Navigation */}
-            {primaryNavigation.map((item) => {
+            {mainNavigation.map((item) => {
               const isActive = location.pathname === item.url;
               return (
                 <Button
@@ -90,66 +78,42 @@ export function TopNav() {
                 <div className="px-2 py-1.5 text-sm font-medium text-muted-foreground">
                   Business Intelligence
                 </div>
-                <DropdownMenuItem asChild>
-                  <NavLink
-                    to="/reports"
-                    className={({ isActive }) =>
-                      cn(
-                        "flex items-center px-2 py-1.5 text-sm cursor-pointer",
-                        isActive && "bg-accent text-accent-foreground"
-                      )
-                    }
-                  >
-                    <FileText className="w-4 h-4 mr-2" />
-                    Reports
-                  </NavLink>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <NavLink
-                    to="/legal-notices"
-                    className={({ isActive }) =>
-                      cn(
-                        "flex items-center px-2 py-1.5 text-sm cursor-pointer",
-                        isActive && "bg-accent text-accent-foreground"
-                      )
-                    }
-                  >
-                    <Scale className="w-4 h-4 mr-2" />
-                    Legal Notices
-                  </NavLink>
-                </DropdownMenuItem>
+                {analyticsNavigation.map((item) => (
+                  <DropdownMenuItem key={item.title} asChild>
+                    <NavLink
+                      to={item.url}
+                      className={({ isActive }) =>
+                        cn(
+                          "flex items-center px-2 py-1.5 text-sm cursor-pointer",
+                          isActive && "bg-accent text-accent-foreground"
+                        )
+                      }
+                    >
+                      <item.icon className="w-4 h-4 mr-2" />
+                      {item.title}
+                    </NavLink>
+                  </DropdownMenuItem>
+                ))}
                 <DropdownMenuSeparator />
                 <div className="px-2 py-1.5 text-sm font-medium text-muted-foreground">
                   System & Support
                 </div>
-                <DropdownMenuItem asChild>
-                  <NavLink
-                    to="/setup"
-                    className={({ isActive }) =>
-                      cn(
-                        "flex items-center px-2 py-1.5 text-sm cursor-pointer",
-                        isActive && "bg-accent text-accent-foreground"
-                      )
-                    }
-                  >
-                    <Settings className="w-4 h-4 mr-2" />
-                    Setup & Config
-                  </NavLink>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <NavLink
-                    to="/faq"
-                    className={({ isActive }) =>
-                      cn(
-                        "flex items-center px-2 py-1.5 text-sm cursor-pointer",
-                        isActive && "bg-accent text-accent-foreground"
-                      )
-                    }
-                  >
-                    <HelpCircle className="w-4 h-4 mr-2" />
-                    FAQ
-                  </NavLink>
-                </DropdownMenuItem>
+                {systemNavigation.map((item) => (
+                  <DropdownMenuItem key={item.title} asChild>
+                    <NavLink
+                      to={item.url}
+                      className={({ isActive }) =>
+                        cn(
+                          "flex items-center px-2 py-1.5 text-sm cursor-pointer",
+                          isActive && "bg-accent text-accent-foreground"
+                        )
+                      }
+                    >
+                      <item.icon className="w-4 h-4 mr-2" />
+                      {item.title}
+                    </NavLink>
+                  </DropdownMenuItem>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
