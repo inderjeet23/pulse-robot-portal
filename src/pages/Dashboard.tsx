@@ -315,16 +315,22 @@ const Dashboard = () => {
 
       {/* Desktop Layout - hidden on mobile */}
       <div className="hidden md:block space-y-6">
-        {/* Primary Metrics Grid - 2 rows, 3 columns */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="mb-6">
+          {/* Enhanced Rent Overview - Top, full-width */}
+          <EnhancedRentOverview rentFilter={rentFilter} />
+        </div>
+
+        {/* Primary Metrics Grid - Single row below EnhancedRentOverview */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <MetricCard
             label="Overdue Rent"
-            value={`$${stats.overdueRentAmount.toLocaleString()}`}
+            value={`${stats.overdueRentAmount.toLocaleString()}`}
             icon={DollarSign}
             status={stats.overdueTenantsCount > 0 ? "critical" : "success"}
             trend={{ direction: 'down', percentage: 12 }}
             loading={loading}
-            onClick={() => navigate("/rent")}
+            onClick={() => setRentFilter("overdue")}
+            tooltipContent={`${stats.overdueTenantsCount} tenants are overdue, totaling ${stats.overdueRentAmount.toLocaleString()}.`}
           />
 
           <MetricCard
@@ -335,6 +341,7 @@ const Dashboard = () => {
             trend={{ direction: 'up', percentage: 8 }}
             loading={loading}
             onClick={() => navigate("/maintenance")}
+            tooltipContent={`${stats.newRequests} new maintenance requests are awaiting review.`}
           />
 
           <MetricCard
@@ -345,16 +352,7 @@ const Dashboard = () => {
             trend={{ direction: 'down', percentage: 5 }}
             loading={loading}
             onClick={() => navigate("/tenants")}
-          />
-
-          <MetricCard
-            label="Total Properties"
-            value={stats.totalProperties}
-            icon={Home}
-            status="neutral"
-            trend={{ direction: 'up', percentage: 2 }}
-            loading={loading}
-            onClick={() => navigate("/tenants")}
+            tooltipContent={`${stats.leasesExpiringSoon} leases are expiring in the next 60 days.`}
           />
 
           <MetricCard
@@ -365,16 +363,7 @@ const Dashboard = () => {
             trend={{ direction: 'up', percentage: 3 }}
             loading={loading}
             onClick={() => navigate("/tenants")}
-          />
-
-          <MetricCard
-            label="Avg Response Time"
-            value={`${stats.avgResponseTime}d`}
-            icon={Clock}
-            status={stats.avgResponseTime < 1 ? "success" : stats.avgResponseTime < 3 ? "warning" : "critical"}
-            trend={{ direction: 'down', percentage: 15 }}
-            loading={loading}
-            onClick={() => navigate("/maintenance")}
+            tooltipContent={`Calculated from ${stats.totalTenants} of ${stats.totalProperties} units.`}
           />
         </div>
 

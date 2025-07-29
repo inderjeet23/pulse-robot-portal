@@ -65,9 +65,10 @@ const statusIcons: Record<string, any> = {
   overdue: AlertTriangle
 };
 
-export const EnhancedRentOverview = () => {
+export const EnhancedRentOverview = ({ rentFilter }: { rentFilter: string | null }) => {
   const { propertyManager } = useAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const [rentRecords, setRentRecords] = useState<RentRecord[]>([]);
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(true);
@@ -331,14 +332,34 @@ export const EnhancedRentOverview = () => {
               Track rent payments, overdue accounts, and send notices
             </CardDescription>
           </div>
-          <Button 
-            size="sm" 
-            className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-button"
-            onClick={() => setIsPaymentDialogOpen(true)}
-          >
-            <Receipt className="h-4 w-4 mr-2" />
-            Log Payment
-          </Button>
+          <div className="flex items-center gap-2">
+            {rentFilter && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.location.reload()} // Simple way to clear filter for now
+              >
+                Clear Filter
+              </Button>
+            )}
+            {filteredRecords.length > 5 && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate("/tenants")}
+              >
+                View All
+              </Button>
+            )}
+            <Button 
+              size="sm" 
+              className="bg-primary hover:bg-primary/90 text-primary-foreground shadow-button"
+              onClick={() => setIsPaymentDialogOpen(true)}
+            >
+              <Receipt className="h-4 w-4 mr-2" />
+              Log Payment
+            </Button>
+          </div>
         </div>
         
         {/* Enhanced Stats */}
@@ -415,8 +436,9 @@ export const EnhancedRentOverview = () => {
                         <TableRow 
                           key={record.id}
                           className={`hover:bg-muted/50 transition-colors ${
-                            isOverdue ? "bg-red-50 dark:bg-red-900/10 border-l-4 border-l-red-500" : ""
+                            isOverdue ? "bg-red-50 dark:bg-red-900/20 border-l-4 border-l-red-500" : ""
                           }`}
+                        >
                         >
                           <TableCell>
                             <div className="space-y-1">

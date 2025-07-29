@@ -162,10 +162,12 @@ export function RecentMaintenance() {
               ))}
             </div>
             
-            <Button variant="outline" className="w-full" size="sm">
-              View All Requests
-              <ArrowRight className="w-4 h-4 ml-2" />
-            </Button>
+            {totalRequests > 5 && (
+              <Button variant="outline" className="w-full" size="sm" onClick={() => navigate("/maintenance")}>
+                View All Requests
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Button>
+            )}
           </>
         )}
       </CardContent>

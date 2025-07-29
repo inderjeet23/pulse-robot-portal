@@ -104,25 +104,24 @@ export function MetricCard({
                   </div>
                 )}
               </div>
-              <div className="text-xs font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
+              <div className="text-sm font-medium text-gray-600 dark:text-gray-400 uppercase tracking-wide">
                 {label}
               </div>
             </div>
           </CardContent>
         </Card>
       </TooltipTrigger>
-      <TooltipContent>
-        <div className="space-y-1">
-          <p className="font-semibold">{label} Details</p>
-          <p className="text-xs">Current: {value}</p>
-          {trend && (
-            <p className="text-xs">
-              {trend.direction === 'up' ? '↗' : '↘'} {trend.percentage}% from last month
-            </p>
-          )}
-          <p className="text-xs text-muted-foreground">Click for detailed view</p>
-        </div>
-      </TooltipContent>
+      {tooltipContent && (
+        <TooltipContent>
+          <div className="space-y-1">
+            {typeof tooltipContent === 'string' ? (
+              <p className="text-xs">{tooltipContent}</p>
+            ) : (
+              tooltipContent
+            )}
+          </div>
+        </TooltipContent>
+      )}
     </Tooltip>
   );
 }
