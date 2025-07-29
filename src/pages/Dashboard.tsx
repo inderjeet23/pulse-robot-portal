@@ -301,11 +301,11 @@ const Dashboard = () => {
                 <Button
                   key={index}
                   variant="outline"
-                  className="h-16 flex flex-col items-center justify-center space-y-1 text-xs"
+                  className="h-14 flex flex-col items-center justify-center space-y-1 text-xs"
                   onClick={action.action}
                 >
-                  <action.icon className="w-4 h-4" />
-                  <span className="font-medium leading-none">{action.title}</span>
+                  <action.icon className="w-3.5 h-3.5" />
+                  <span className="font-medium leading-none text-xs">{action.title}</span>
                 </Button>
               ))}
             </div>
@@ -389,13 +389,13 @@ const Dashboard = () => {
                 <Button
                   key={index}
                   variant="outline"
-                  className="h-20 flex flex-col items-center justify-center space-y-2 transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-950/20 hover:border-blue-300 dark:hover:border-blue-700 hover:scale-105 hover:shadow-lg group"
+                  className="h-16 flex flex-col items-center justify-center space-y-1 transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-950/20 hover:border-blue-300 dark:hover:border-blue-700 hover:scale-105 hover:shadow-lg group"
                   onClick={action.action}
                 >
-                  <action.icon className="w-5 h-5 transition-transform duration-200 group-hover:scale-110" />
+                  <action.icon className="w-4 h-4 transition-transform duration-200 group-hover:scale-110" />
                   <div className="text-center">
-                    <div className="text-sm font-medium">{action.title}</div>
-                    <div className="text-xs text-muted-foreground">{action.description}</div>
+                    <div className="text-xs font-medium">{action.title}</div>
+                    <div className="text-xs text-muted-foreground opacity-70">{action.description}</div>
                   </div>
                 </Button>
               ))}

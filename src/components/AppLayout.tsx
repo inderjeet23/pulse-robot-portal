@@ -63,7 +63,7 @@ export function AppLayout() {
         </div>
 
         {/* Desktop Layout with Sidebar */}
-        <div className="hidden md:block min-h-screen w-full">
+        <div className="hidden md:flex min-h-screen w-full">
           <AppSidebar />
           
           <div className="flex-1 flex flex-col">
@@ -74,14 +74,14 @@ export function AppLayout() {
             </header>
             
             {/* Main Content */}
-            <main className="flex-1 container mx-auto px-4 py-6 space-y-6 max-w-7xl">
+            <main className="flex-1 container mx-auto px-3 py-4 space-y-4 max-w-7xl">
               <Outlet context={{ newMaintenanceRequestOpen, setNewMaintenanceRequestOpen }} />
             </main>
           </div>
         </div>
 
         {/* Mobile Content */}
-        <main className="md:hidden container mx-auto px-2 py-4 space-y-4 max-w-7xl pb-24">
+        <main className="md:hidden container mx-auto px-3 py-3 space-y-3 max-w-7xl pb-20">
           <Outlet context={{ newMaintenanceRequestOpen, setNewMaintenanceRequestOpen }} />
         </main>
 
