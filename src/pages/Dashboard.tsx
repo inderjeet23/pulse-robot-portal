@@ -2,6 +2,7 @@ import { StatusCard } from "@/components/StatusCard";
 import { MetricCard } from "@/components/MetricCard";
 import { CompactKPI } from "@/components/CompactKPI";
 import { ActionItem } from "@/components/ActionItem";
+import { ActionCenter } from "@/components/ActionCenter";
 import { OnboardingChecklist } from "@/components/OnboardingChecklist";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -218,6 +219,8 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
+      <ActionCenter overdueCount={stats.overdueTenantsCount} maintenanceCount={stats.newRequests} />
+
       {showOnboardingChecklist ? (
         <OnboardingChecklist 
           hasProperties={stats.hasProperties}
