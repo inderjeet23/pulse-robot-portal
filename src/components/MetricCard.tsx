@@ -38,7 +38,7 @@ export function MetricCard({
   trend, 
   status,
   onClick,
-  loading = false
+  loading = false,
   tooltipContent,
 }: MetricCardProps) {
   if (loading) {
