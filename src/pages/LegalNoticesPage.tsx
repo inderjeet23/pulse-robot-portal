@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
 import { PayOrQuitNotice } from "@/components/PayOrQuitNotice";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
 
 interface LegalNotice {
   id: string;
@@ -29,6 +30,7 @@ interface LegalNotice {
 }
 
 const LegalNoticesPage = () => {
+  const { toast } = useToast();
   const [notices, setNotices] = useState<LegalNotice[]>([]);
   const [filteredNotices, setFilteredNotices] = useState<LegalNotice[]>([]);
   const [loading, setLoading] = useState(true);
@@ -212,7 +214,13 @@ const LegalNoticesPage = () => {
                           rentRecordId={selectedNotice.rent_record_id}
                           amountOwed={selectedNotice.amount_owed}
                           daysToQuit={selectedNotice.days_to_pay}
-                          onNoticeGenerated={fetchNotices}
+                          onNoticeGenerated={() => {
+                            fetchNotices();
+                            toast({
+                              title: "Notice Updated",
+                              description: "Legal notice has been updated successfully.",
+                            });
+                          }}
                           existingNoticeId={selectedNotice.id}
                         />
                       )}

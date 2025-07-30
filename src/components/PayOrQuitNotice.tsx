@@ -145,6 +145,16 @@ export const PayOrQuitNotice = ({
   }, [existingNoticeId, loadExistingNotice]);
 
   const generateNotice = async () => {
+    // If we already have a notice (viewing existing), don't create a new one
+    if (existingNoticeId && notice) {
+      toast({
+        title: "Notice Already Exists",
+        description: "This notice has already been generated. Use the actions below to send or download it.",
+        variant: "default"
+      });
+      return;
+    }
+
     setIsGenerating(true);
     try {
       // Get property manager, tenant, and rent record details
@@ -378,7 +388,7 @@ export const PayOrQuitNotice = ({
               </p>
             </div>
             <Button onClick={generateNotice} disabled={isGenerating} className="w-full">
-              {isGenerating ? "Generating..." : "Generate NJ Compliant Notice"}
+              {isGenerating ? "Generating..." : existingNoticeId && notice ? "Notice Already Generated" : "Generate NJ Compliant Notice"}
             </Button>
           </div>
         </CardContent>

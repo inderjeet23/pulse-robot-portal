@@ -663,14 +663,16 @@ export const EnhancedRentOverview = ({ rentFilter }: { rentFilter: string | null
             <PayOrQuitNotice
               tenantId={selectedRecord.tenant_id}
               rentRecordId={selectedRecord.id}
-              amountOwed={selectedRecord.amount_due - selectedRecord.amount_paid}
+              amountOwed={selectedRecord.amount_due - selectedRecord.amount_paid + (selectedRecord.late_fees || 0)}
               daysToQuit={3}
               onNoticeGenerated={() => {
                 setIsNoticeDialogOpen(false);
                 toast({
                   title: "Legal Notice Generated",
-                  description: `Notice created for ${selectedTenant.name}`,
+                  description: `Notice created for ${selectedTenant.name}. You can view and manage it in the Legal Notices section.`,
                 });
+                // Optionally navigate to legal notices page
+                // navigate('/legal-notices');
               }}
             />
           )}
