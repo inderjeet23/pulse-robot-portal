@@ -14,6 +14,7 @@ interface MetricCardProps {
   status: 'critical' | 'warning' | 'success' | 'neutral';
   onClick?: () => void;
   loading?: boolean;
+  tooltipContent?: React.ReactNode;
 }
 
 const statusColors = {
@@ -38,6 +39,7 @@ export function MetricCard({
   status,
   onClick,
   loading = false
+  tooltipContent,
 }: MetricCardProps) {
   if (loading) {
     return (
