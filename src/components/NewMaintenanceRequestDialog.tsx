@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -121,43 +121,6 @@ export function NewMaintenanceRequestDialog({
   const isInternalRequest = form.watch("isInternalRequest");
   const selectedTenantId = form.watch("tenantId");
 
-  // Fetch tenants when dialog opens
-  useEffect(() => {
-    if (open && propertyManager?.id) {
-      fetchTenants();
-    }
-  }, [open, propertyManager?.id, fetchTenants]);
-
-  // Auto-populate fields when tenant is selected
-  useEffect(() => {
-    if (selectedTenantId && !isInternalRequest) {
-      const selectedTenant = tenants.find(t => t.id === selectedTenantId);
-      if (selectedTenant) {
-        form.setValue("tenantName", selectedTenant.name);
-        form.setValue("tenantEmail", selectedTenant.email || "");
-        form.setValue("tenantPhone", selectedTenant.phone || "");
-        form.setValue("propertyAddress", selectedTenant.property_address);
-        form.setValue("unitNumber", selectedTenant.unit_number || "");
-      }
-    }
-  }, [selectedTenantId, tenants, isInternalRequest, form]);
-
-  // Reset form when internal request checkbox changes
-  useEffect(() => {
-    if (isInternalRequest) {
-      form.setValue("tenantId", "");
-      form.setValue("tenantName", "Internal Maintenance");
-      form.setValue("tenantEmail", "");
-      form.setValue("tenantPhone", "");
-      form.setValue("propertyAddress", "");
-      form.setValue("unitNumber", "");
-    } else {
-      form.setValue("tenantName", "");
-      form.setValue("propertyAddress", "");
-      form.setValue("unitNumber", "");
-    }
-  }, [isInternalRequest, form]);
-
   const fetchTenants = useCallback(async () => {
     if (!propertyManager?.id) return;
 
@@ -182,6 +145,13 @@ export function NewMaintenanceRequestDialog({
       setTenantsLoading(false);
     }
   }, [propertyManager?.id, toast]);
+
+  // Fetch tenants when dialog opens
+  useEffect(() => {
+    if (open && propertyManager?.id) {
+      fetchTenants();
+    }
+  }, [open, propertyManager?.id, fetchTenants]);
 
   const onSubmit = async (data: FormData) => {
     if (!propertyManager?.id) return;

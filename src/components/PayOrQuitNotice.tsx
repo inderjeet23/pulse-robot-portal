@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -30,9 +30,38 @@ interface NoticeData {
   days_to_pay: number;
   generated_date: string;
   status: string;
-  tenant: Tenant; // Use the Tenant interface defined elsewhere
-  propertyManager: PropertyManager; // Assuming PropertyManager interface is defined
-  rentRecord: RentRecord; // Assuming RentRecord interface is defined
+  tenant?: Tenant;
+  propertyManager?: PropertyManager;
+  rentRecord?: RentRecord;
+}
+
+interface Tenant {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  property_address: string;
+  unit_number: string;
+  lease_start_date?: string;
+}
+
+interface PropertyManager {
+  id: string;
+  name: string;
+  email: string;
+  company_name?: string;
+  phone?: string;
+  address?: string;
+  user_id: string;
+}
+
+interface RentRecord {
+  id: string;
+  tenant_id: string;
+  amount_due: number;
+  due_date: string;
+  status: string;
+  late_fees: number;
 }
 
 export const PayOrQuitNotice = ({
@@ -70,7 +99,10 @@ export const PayOrQuitNotice = ({
         .eq('id', existingNoticeId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching property manager:', error);
+        return;
+      }
       
       if (existingNotice) {
         setNotice({

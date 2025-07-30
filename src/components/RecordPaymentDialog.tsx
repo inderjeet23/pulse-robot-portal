@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -102,6 +102,37 @@ export function RecordPaymentDialog({
     },
   });
 
+  const fetchPendingRentRecord = useCallback(async (tenantId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from("rent_records")
+        .select("id, amount_due, due_date, late_fees")
+        .eq("tenant_id", tenantId)
+        .eq("status", "pending")
+        .order("due_date", { ascending: true })
+        .limit(1)
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+      
+      if (data) {
+        setSelectedTenantRent(data);
+        // Auto-fill amount with what's due
+        const totalDue = (data.amount_due || 0) + (data.late_fees || 0);
+        form.setValue("amountPaid", totalDue.toString());
+      } else {
+        setSelectedTenantRent(null);
+        // Set to regular rent amount if no pending record
+        const tenant = tenants.find(t => t.id === tenantId);
+        if (tenant) {
+          form.setValue("amountPaid", tenant.rent_amount.toString());
+        }
+      }
+    } catch (error) {
+      console.error("Error fetching pending rent record:", error);
+    }
+  }, [form, tenants]);
+
   const selectedTenantId = form.watch("tenantId");
 
   // Fetch tenants when dialog opens
@@ -143,36 +174,6 @@ export function RecordPaymentDialog({
     }
   };
 
-  const fetchPendingRentRecord = useCallback(async (tenantId: string) => {
-    try {
-      const { data, error } = await supabase
-        .from("rent_records")
-        .select("id, amount_due, due_date, late_fees")
-        .eq("tenant_id", tenantId)
-        .eq("status", "pending")
-        .order("due_date", { ascending: true })
-        .limit(1)
-        .single();
-
-      if (error && error.code !== 'PGRST116') throw error;
-      
-      if (data) {
-        setSelectedTenantRent(data);
-        // Auto-fill amount with what's due
-        const totalDue = (data.amount_due || 0) + (data.late_fees || 0);
-        form.setValue("amountPaid", totalDue.toString());
-      } else {
-        setSelectedTenantRent(null);
-        // Set to regular rent amount if no pending record
-        const tenant = tenants.find(t => t.id === tenantId);
-        if (tenant) {
-          form.setValue("amountPaid", tenant.rent_amount.toString());
-        }
-      }
-    } catch (error) {
-      console.error("Error fetching pending rent record:", error);
-    }
-  }, [form, tenants]);
 
   const onSubmit = async (data: FormData) => {
     if (!propertyManager?.id) return;

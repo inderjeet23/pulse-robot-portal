@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   CommandDialog,
@@ -47,13 +47,6 @@ export function GlobalCommandPalette({
   const [tenants, setTenants] = useState<Tenant[]>([]);
   const [loading, setLoading] = useState(false);
 
-  // Fetch tenants when dialog opens
-  useEffect(() => {
-    if (open && propertyManager?.id) {
-      fetchTenants();
-    }
-  }, [open, propertyManager?.id, fetchTenants]);
-
   const fetchTenants = useCallback(async () => {
     setLoading(true);
     try {
@@ -71,6 +64,13 @@ export function GlobalCommandPalette({
       setLoading(false);
     }
   }, [propertyManager]);
+
+  // Fetch tenants when dialog opens
+  useEffect(() => {
+    if (open && propertyManager?.id) {
+      fetchTenants();
+    }
+  }, [open, propertyManager?.id, fetchTenants]);
 
   const handleCommand = (command: string, value?: string) => {
     onOpenChange(false);
