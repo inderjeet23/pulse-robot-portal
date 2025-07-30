@@ -77,16 +77,16 @@ export function SetupWizard({ open, onComplete }: SetupWizardProps) {
       complete: async (results) => {
         try {
           const tenants = results.data
-            .filter((row: Record<string, unknown>) => row.name && (row.name as string).trim())
+            .filter((row: Record<string, unknown>) => row.name && typeof row.name === 'string' && row.name.trim())
             .map((row: Record<string, unknown>) => ({
               property_manager_id: propertyManager?.id,
-              name: row.name?.trim(),
-              email: row.email?.trim() || null,
-              phone: row.phone?.trim() || null,
-              unit_number: row.unitNumber?.trim() || null,
+              name: typeof row.name === 'string' ? row.name.trim() : '',
+              email: typeof row.email === 'string' ? row.email.trim() || null : null,
+              phone: typeof row.phone === 'string' ? row.phone.trim() || null : null,
+              unit_number: typeof row.unitNumber === 'string' ? row.unitNumber.trim() || null : null,
               property_address: propertyAddress,
-              rent_amount: parseFloat(row.rentAmount) || 0,
-              rent_due_date: parseInt(row.rentDueDate) || 1,
+              rent_amount: typeof row.rentAmount === 'string' ? parseFloat(row.rentAmount) || 0 : 0,
+              rent_due_date: typeof row.rentDueDate === 'string' ? parseInt(row.rentDueDate) || 1 : 1,
             }));
 
           if (tenants.length === 0) {

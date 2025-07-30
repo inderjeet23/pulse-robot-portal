@@ -93,23 +93,33 @@ export const PayOrQuitNotice = ({
         .select(`
           *,
           tenant:tenants(*),
-          propertyManager:property_managers(*),
           rentRecord:rent_records(*)
         `)
         .eq('id', existingNoticeId)
         .single();
 
       if (error) {
-        console.error('Error fetching property manager:', error);
+        console.error('Error fetching notice:', error);
         return;
+      }
+
+      // Also get property manager separately
+      const { data: propertyManager, error: pmError } = await supabase
+        .from('property_managers')
+        .select('*')
+        .eq('id', existingNotice.property_manager_id)
+        .single();
+
+      if (pmError) {
+        console.error('Error fetching property manager:', pmError);
       }
       
       if (existingNotice) {
         setNotice({
           ...existingNotice,
-          tenant: existingNotice.tenant,
-          propertyManager: existingNotice.propertyManager,
-          rentRecord: existingNotice.rentRecord
+          tenant: existingNotice.tenant || undefined,
+          propertyManager: propertyManager || undefined,
+          rentRecord: existingNotice.rentRecord || undefined
         });
         
         // Pre-fill email form

@@ -1,3 +1,4 @@
+import { useEffect, useState, useCallback } from "react";
 import { StatusCard } from "@/components/StatusCard";
 import { MetricCard } from "@/components/MetricCard";
 import { CompactKPI } from "@/components/CompactKPI";
@@ -9,7 +10,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DollarSign, Wrench, Users, AlertTriangle, Home, Clock, Plus, Calendar, Receipt } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEffect, useState, useCallback } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { AddTenantDialog } from "@/components/AddTenantDialog";
 import { RecordPaymentDialog } from "@/components/RecordPaymentDialog";

@@ -7,6 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Wrench, Clock, User, ArrowRight, AlertTriangle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 
 interface MaintenanceRequest {
@@ -29,6 +30,7 @@ const priorityColors = {
 
 export function RecentMaintenance() {
   const { propertyManager } = useAuth();
+  const navigate = useNavigate();
   const [requests, setRequests] = useState<MaintenanceRequest[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -162,7 +164,7 @@ export function RecentMaintenance() {
               ))}
             </div>
             
-            {totalRequests > 5 && (
+            {requests.length > 5 && (
               <Button variant="outline" className="w-full" size="sm" onClick={() => navigate("/maintenance")}>
                 View All Requests
                 <ArrowRight className="w-4 h-4 ml-2" />
