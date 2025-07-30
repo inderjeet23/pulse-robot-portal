@@ -30,9 +30,9 @@ interface NoticeData {
   days_to_pay: number;
   generated_date: string;
   status: string;
-  tenant: any;
-  propertyManager: any;
-  rentRecord: any;
+  tenant: Tenant; // Use the Tenant interface defined elsewhere
+  propertyManager: PropertyManager; // Assuming PropertyManager interface is defined
+  rentRecord: RentRecord; // Assuming RentRecord interface is defined
 }
 
 export const PayOrQuitNotice = ({
@@ -55,7 +55,7 @@ export const PayOrQuitNotice = ({
   const { toast } = useToast();
 
   // Load existing notice if existingNoticeId is provided
-  const loadExistingNotice = async () => {
+  const loadExistingNotice = useCallback(async () => {
     if (!existingNoticeId) return;
     
     try {
@@ -93,14 +93,14 @@ export const PayOrQuitNotice = ({
         variant: "destructive"
       });
     }
-  };
+  }, [existingNoticeId, toast]);
 
   // Load existing notice on component mount if existingNoticeId is provided
   useEffect(() => {
     if (existingNoticeId) {
       loadExistingNotice();
     }
-  }, [existingNoticeId]);
+  }, [existingNoticeId, loadExistingNotice]);
 
   const generateNotice = async () => {
     setIsGenerating(true);

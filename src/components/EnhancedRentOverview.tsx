@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -59,7 +59,8 @@ const statusColors: Record<string, string> = {
   overdue: "bg-destructive/20 text-destructive"
 };
 
-const statusIcons: Record<string, any> = {
+import { LucideIcon } from "lucide-react";
+const statusIcons: Record<string, LucideIcon> = {
   pending: Clock,
   partial: AlertTriangle,
   paid: TrendingUp,
@@ -203,7 +204,7 @@ export const EnhancedRentOverview = ({ rentFilter }: { rentFilter: string | null
   useEffect(() => {
     fetchTenants();
     fetchRentRecords();
-  }, [propertyManager?.id]);
+  }, [propertyManager?.id, fetchTenants, fetchRentRecords]);
 
   const handleLogPayment = async () => {
     if (!propertyManager?.id || !paymentFormData.tenant_id || !paymentFormData.amount) {
@@ -446,7 +447,6 @@ export const EnhancedRentOverview = ({ rentFilter }: { rentFilter: string | null
                           className={`hover:bg-muted/50 transition-colors ${
                             isOverdue ? "bg-red-50 dark:bg-red-900/20 border-l-4 border-l-red-500" : ""
                           }`}
-                        >
                         >
                           <TableCell>
                             <div className="space-y-1">

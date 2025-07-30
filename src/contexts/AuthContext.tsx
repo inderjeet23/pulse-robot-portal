@@ -23,13 +23,13 @@ interface AuthContextType {
   session: Session | null;
   propertyManager: PropertyManager | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, name: string) => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<{ error: Error | null }>;
+  signUp: (email: string, password: string, name: string) => Promise<{ error: Error | null }>;
   signOut: () => Promise<void>;
-  updatePropertyManager: (updates: Partial<PropertyManager>) => Promise<{ error: any }>;
+  updatePropertyManager: (updates: Partial<PropertyManager>) => Promise<{ error: Error | null }>;
   refreshPropertyManager: () => Promise<void>;
-  resetPassword: (email: string) => Promise<{ error: any }>;
-  updatePassword: (newPassword: string) => Promise<{ error: any }>;
+  resetPassword: (email: string) => Promise<{ error: Error | null }>;
+  updatePassword: (newPassword: string) => Promise<{ error: Error | null }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -69,7 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const createPropertyManager = async (user: User, name: string) => {
+  const createPropertyManager = useCallback(async (user: User, name: string) => {
     try {
       const { data, error } = await supabase
         .from('property_managers')
@@ -92,7 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     } catch (error) {
       console.error('Error creating property manager:', error);
     }
-  };
+  }, []);
 
   useEffect(() => {
     // Set up auth state listener

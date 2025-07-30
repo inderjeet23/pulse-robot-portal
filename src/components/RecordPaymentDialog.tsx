@@ -116,7 +116,7 @@ export function RecordPaymentDialog({
     if (selectedTenantId) {
       fetchPendingRentRecord(selectedTenantId);
     }
-  }, [selectedTenantId]);
+  }, [selectedTenantId, fetchPendingRentRecord]);
 
   const fetchTenants = async () => {
     if (!propertyManager?.id) return;
@@ -143,7 +143,7 @@ export function RecordPaymentDialog({
     }
   };
 
-  const fetchPendingRentRecord = async (tenantId: string) => {
+  const fetchPendingRentRecord = useCallback(async (tenantId: string) => {
     try {
       const { data, error } = await supabase
         .from("rent_records")
@@ -172,7 +172,7 @@ export function RecordPaymentDialog({
     } catch (error) {
       console.error("Error fetching pending rent record:", error);
     }
-  };
+  }, [form, tenants]);
 
   const onSubmit = async (data: FormData) => {
     if (!propertyManager?.id) return;

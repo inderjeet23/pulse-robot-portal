@@ -34,7 +34,8 @@ interface MaintenanceCardListProps {
   onUpdateStatus: (requestId: string, newStatus: string) => void;
 }
 
-const statusIcons: Record<string, any> = {
+import { LucideIcon } from "lucide-react";
+const statusIcons: Record<string, LucideIcon> = {
   New: AlertCircle,
   "In Progress": Clock,
   Completed: CheckCircle,

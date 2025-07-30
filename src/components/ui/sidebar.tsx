@@ -733,6 +733,7 @@ const SidebarMenuSubButton = React.forwardRef<
 })
 SidebarMenuSubButton.displayName = "SidebarMenuSubButton"
 
+import { useSidebar, SidebarProvider } from "@/hooks/useSidebar";
 export {
   Sidebar,
   SidebarContent,
@@ -757,5 +758,4 @@ export {
   SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
-  useSidebar,
-}
+};

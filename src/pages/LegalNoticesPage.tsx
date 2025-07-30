@@ -72,7 +72,7 @@ const LegalNoticesPage = () => {
     }
   };
 
-  const filterNotices = () => {
+  const filterNotices = useCallback(() => {
     let filtered = notices;
 
     if (searchTerm) {
@@ -87,7 +87,7 @@ const LegalNoticesPage = () => {
     }
 
     setFilteredNotices(filtered);
-  };
+  }, [notices, searchTerm, statusFilter]);
 
   const getStatusColor = (status: string) => {
     switch (status) {

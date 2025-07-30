@@ -42,7 +42,7 @@ const ReportsPage = () => {
     tenants: { totalRecords: 0, dateRange: "" },
   });
 
-  const downloadCSV = (data: any[], fileName: string) => {
+  const downloadCSV = (data: Record<string, unknown>[], fileName: string) => {
     const csv = Papa.unparse(data);
     const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
@@ -77,7 +77,7 @@ const ReportsPage = () => {
     }
   };
 
-  const fetchReportSummaries = async () => {
+  const fetchReportSummaries = useCallback(async () => {
     if (!propertyManager?.id) return;
 
     try {
@@ -161,7 +161,7 @@ const ReportsPage = () => {
     } catch (error) {
       console.error('Error fetching report summaries:', error);
     }
-  };
+  }, [propertyManager?.id, dateRange, selectedProperty]);
 
   const handleExportRentData = async () => {
     if (!propertyManager?.id) return;

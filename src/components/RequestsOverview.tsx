@@ -43,7 +43,8 @@ const priorityColors: Record<string, string> = {
   Urgent: "bg-destructive text-destructive-foreground"
 };
 
-const statusIcons: Record<string, any> = {
+import { LucideIcon } from "lucide-react";
+const statusIcons: Record<string, LucideIcon> = {
   New: AlertCircle,
   "In Progress": Clock,
   Completed: CheckCircle,
@@ -70,7 +71,7 @@ export const RequestsOverview = ({
   const newRequestDialogOpen = externalNewRequestDialogOpen ?? internalNewRequestDialogOpen;
   const setNewRequestDialogOpen = externalSetNewRequestDialogOpen ?? setInternalNewRequestDialogOpen;
 
-  const fetchRequests = async () => {
+  const fetchRequests = useCallback(async () => {
     if (!propertyManager?.id) return;
 
     try {
@@ -92,11 +93,11 @@ export const RequestsOverview = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [propertyManager?.id, toast]);
 
   useEffect(() => {
     fetchRequests();
-  }, [propertyManager?.id]);
+  }, [propertyManager?.id, fetchRequests]);
 
   const updateRequestStatus = async (requestId: string, newStatus: string) => {
     try {

@@ -126,7 +126,7 @@ export function NewMaintenanceRequestDialog({
     if (open && propertyManager?.id) {
       fetchTenants();
     }
-  }, [open, propertyManager?.id]);
+  }, [open, propertyManager?.id, fetchTenants]);
 
   // Auto-populate fields when tenant is selected
   useEffect(() => {
@@ -158,7 +158,7 @@ export function NewMaintenanceRequestDialog({
     }
   }, [isInternalRequest, form]);
 
-  const fetchTenants = async () => {
+  const fetchTenants = useCallback(async () => {
     if (!propertyManager?.id) return;
 
     setTenantsLoading(true);
@@ -181,7 +181,7 @@ export function NewMaintenanceRequestDialog({
     } finally {
       setTenantsLoading(false);
     }
-  };
+  }, [propertyManager?.id, toast]);
 
   const onSubmit = async (data: FormData) => {
     if (!propertyManager?.id) return;

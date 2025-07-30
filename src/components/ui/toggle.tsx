@@ -40,4 +40,5 @@ const Toggle = React.forwardRef<
 
 Toggle.displayName = TogglePrimitive.Root.displayName
 
-export { Toggle, toggleVariants }
+export { Toggle };
+export type { VariantProps as ToggleVariantProps } from "class-variance-authority";

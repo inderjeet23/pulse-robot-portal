@@ -62,7 +62,7 @@ const Dashboard = () => {
   const [comingSoonFeature, setComingSoonFeature] = useState("");
   const [rentFilter, setRentFilter] = useState<string | null>(null);
 
-  const fetchStats = async () => {
+  const fetchStats = useCallback(async () => {
     if (!propertyManager?.id) return;
 
     try {
@@ -127,7 +127,7 @@ const Dashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [propertyManager?.id]);
 
   useEffect(() => {
     fetchStats();

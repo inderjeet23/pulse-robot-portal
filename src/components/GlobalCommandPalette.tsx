@@ -52,9 +52,9 @@ export function GlobalCommandPalette({
     if (open && propertyManager?.id) {
       fetchTenants();
     }
-  }, [open, propertyManager?.id]);
+  }, [open, propertyManager?.id, fetchTenants]);
 
-  const fetchTenants = async () => {
+  const fetchTenants = useCallback(async () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -70,7 +70,7 @@ export function GlobalCommandPalette({
     } finally {
       setLoading(false);
     }
-  };
+  }, [propertyManager]);
 
   const handleCommand = (command: string, value?: string) => {
     onOpenChange(false);
@@ -90,17 +90,57 @@ export function GlobalCommandPalette({
   };
 
   const navigationItems = [
-    { label: "Go to Dashboard", value: "/", icon: Home },
-    { label: "Go to Maintenance", value: "/maintenance", icon: Wrench },
-    { label: "Go to Rent Management", value: "/rent", icon: DollarSign },
-    { label: "Go to Tenants", value: "/tenants", icon: Users },
-    { label: "Go to Setup", value: "/setup", icon: Settings },
-    { label: "Go to FAQ", value: "/faq", icon: HelpCircle },
+    {
+      label: "Go to Dashboard",
+      value: "/",
+      icon: Home,
+      keywords: ["home", "main", "overview"],
+    },
+    {
+      label: "Go to Maintenance",
+      value: "/maintenance",
+      icon: Wrench,
+      keywords: ["requests", "repairs", "work orders"],
+    },
+    {
+      label: "Go to Rent Management",
+      value: "/rent",
+      icon: DollarSign,
+      keywords: ["payments", "rent roll", "finances"],
+    },
+    {
+      label: "Go to Tenants",
+      value: "/tenants",
+      icon: Users,
+      keywords: ["residents", "contacts"],
+    },
+    {
+      label: "Go to Setup",
+      value: "/setup",
+      icon: Settings,
+      keywords: ["configuration", "settings", "options"],
+    },
+    { 
+      label: "Go to FAQ", 
+      value: "/faq", 
+      icon: HelpCircle, 
+      keywords: ["help", "support", "questions"] 
+    },
   ];
 
   const actionItems = [
-    { label: "New Maintenance Request", command: "new-maintenance", icon: Plus },
-    { label: "Add New Tenant", value: "/tenants?new=true", icon: UserPlus },
+    {
+      label: "New Maintenance Request",
+      command: "new-maintenance",
+      icon: Plus,
+      keywords: ["new request", "submit repair"],
+    },
+    {
+      label: "Add New Tenant",
+      value: "/tenants?new=true",
+      icon: UserPlus,
+      keywords: ["new user", "create contact", "add person"],
+    },
   ];
 
   return (
@@ -108,14 +148,15 @@ export function GlobalCommandPalette({
       <CommandInput placeholder="Type a command or search tenants..." />
       <CommandList>
         <CommandEmpty>No results found.</CommandEmpty>
-        
+
         <CommandGroup heading="Navigation">
           {navigationItems.map((item) => {
             const Icon = item.icon;
             return (
               <CommandItem
                 key={item.value}
-                onSelect={() => handleCommand('navigate', item.value)}
+                value={`${item.label} ${item.keywords?.join(" ")}`}
+                onSelect={() => handleCommand("navigate", item.value)}
               >
                 <Icon className="mr-2 h-4 w-4" />
                 <span>{item.label}</span>
@@ -126,16 +167,17 @@ export function GlobalCommandPalette({
 
         <CommandSeparator />
 
-        <CommandGroup heading="Quick Actions">
+        <CommandGroup heading="Actions">
           {actionItems.map((item) => {
             const Icon = item.icon;
             return (
               <CommandItem
                 key={item.command || item.value}
-                onSelect={() => 
-                  item.command 
-                    ? handleCommand(item.command) 
-                    : handleCommand('navigate', item.value)
+                value={`${item.label} ${item.keywords?.join(" ")}`}
+                onSelect={() =>
+                  item.command
+                    ? handleCommand(item.command)
+                    : handleCommand("navigate", item.value)
                 }
               >
                 <Icon className="mr-2 h-4 w-4" />
@@ -147,7 +189,7 @@ export function GlobalCommandPalette({
 
         <CommandSeparator />
 
-        <CommandGroup heading="Find Tenant">
+        <CommandGroup heading="Tenants">
           {loading ? (
             <CommandItem disabled>
               <Search className="mr-2 h-4 w-4 animate-spin" />
@@ -157,7 +199,8 @@ export function GlobalCommandPalette({
             tenants.map((tenant) => (
               <CommandItem
                 key={tenant.id}
-                onSelect={() => handleCommand('tenant', tenant.id)}
+                value={`${tenant.name} ${tenant.property_address} ${tenant.unit_number}`}
+                onSelect={() => handleCommand("tenant", tenant.id)}
               >
                 <Users className="mr-2 h-4 w-4" />
                 <div className="flex flex-col">

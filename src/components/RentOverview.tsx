@@ -107,7 +107,7 @@ export const RentOverview = () => {
       setLoading(false);
     }
   };
-  const fetchTenants = async () => {
+  const fetchTenants = useCallback(async () => {
     if (!propertyManager?.id) return;
     try {
       const {
@@ -119,11 +119,11 @@ export const RentOverview = () => {
     } catch (error) {
       console.error('Error fetching tenants:', error);
     }
-  };
+  }, [propertyManager?.id]);
   useEffect(() => {
     fetchRentRecords();
     fetchTenants();
-  }, [propertyManager?.id]);
+  }, [propertyManager?.id, fetchRentRecords, fetchTenants]);
   const markAsPaid = async (recordId: string, amountDue: number) => {
     try {
       const {

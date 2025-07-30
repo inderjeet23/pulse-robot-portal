@@ -62,7 +62,7 @@ export const TenantManagement = () => {
     notes: ""
   });
 
-  const fetchTenants = async () => {
+  const fetchTenants = useCallback(async () => {
     if (!propertyManager?.id) return;
 
     try {
@@ -85,11 +85,11 @@ export const TenantManagement = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [propertyManager?.id, toast]);
 
   useEffect(() => {
     fetchTenants();
-  }, [propertyManager?.id]);
+  }, [propertyManager?.id, fetchTenants]);
 
   // Filter tenants based on search and status
   useEffect(() => {

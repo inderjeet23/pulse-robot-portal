@@ -91,7 +91,7 @@ export const WorkflowCreator = () => {
       setAction("");
       setVendorEmail("");
       
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error creating workflow:', error);
       toast({
         title: "Error",

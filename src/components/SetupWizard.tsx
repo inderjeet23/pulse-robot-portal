@@ -77,8 +77,8 @@ export function SetupWizard({ open, onComplete }: SetupWizardProps) {
       complete: async (results) => {
         try {
           const tenants = results.data
-            .filter((row: any) => row.name && row.name.trim())
-            .map((row: any) => ({
+            .filter((row: Record<string, unknown>) => row.name && (row.name as string).trim())
+            .map((row: Record<string, unknown>) => ({
               property_manager_id: propertyManager?.id,
               name: row.name?.trim(),
               email: row.email?.trim() || null,

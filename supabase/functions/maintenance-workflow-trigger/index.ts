@@ -31,9 +31,9 @@ interface WorkflowRule {
   id: string;
   user_id: string;
   trigger_type: string;
-  trigger_conditions: any;
+  trigger_conditions: { [key: string]: string };
   action_type: string;
-  action_details: any;
+  action_details: { [key: string]: string };
   is_active: boolean;
 }
 
@@ -47,9 +47,6 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('Maintenance workflow trigger started');
     
     const payload = await req.json();
-    console.log('Received payload:', JSON.stringify(payload, null, 2));
-
-    // Extract the new maintenance request from the webhook payload
     const maintenanceRequest: MaintenanceRequest = payload.record;
     
     if (!maintenanceRequest) {
@@ -146,9 +143,9 @@ const handler = async (req: Request): Promise<Response> => {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
 
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in maintenance-workflow-trigger:', error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ error: (error as Error).message }), {
       status: 500,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
@@ -157,7 +154,7 @@ const handler = async (req: Request): Promise<Response> => {
 
 async function executeEmailAction(workflow: WorkflowRule, maintenanceRequest: MaintenanceRequest) {
   try {
-    const actionDetails = workflow.action_details || {};
+    const actionDetails: ActionDetails = workflow.action_details || {};
     const vendorEmail = actionDetails.vendor_email;
 
     if (!vendorEmail) {
@@ -196,7 +193,7 @@ async function executeEmailAction(workflow: WorkflowRule, maintenanceRequest: Ma
     // Log the action execution (optional - you could create a workflow_executions table)
     console.log(`Workflow ${workflow.id} executed: email sent to ${vendorEmail}`);
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error executing email action:', error);
     throw error;
   }
