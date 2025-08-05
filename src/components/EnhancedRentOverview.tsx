@@ -90,27 +90,17 @@ export const EnhancedRentOverview = ({ rentFilter }: { rentFilter: string | null
   const fetchRentRecords = async () => {
     if (!propertyManager?.id) return;
     try {
-      const { data, error } = await supabase
+      // Fetch rent records without the join
+      const { data: rentRecordsData, error: rentError } = await supabase
         .from('rent_records')
-        .select(`
-          *,
-          tenants (
-            id,
-            name,
-            email,
-            phone,
-            property_address,
-            unit_number,
-            rent_amount
-          )
-        `)
+        .select('*')
         .eq('property_manager_id', propertyManager.id)
         .order('due_date', { ascending: false });
 
-      if (error) throw error;
+      if (rentError) throw rentError;
       
       // Create overdue records for tenants who haven't paid this month
-      const enrichedRecords = await createMissingOverdueRecords(data || []);
+      const enrichedRecords = await createMissingOverdueRecords(rentRecordsData || []);
       setRentRecords(enrichedRecords);
     } catch (error) {
       console.error('Error fetching rent records:', error);
@@ -140,25 +130,51 @@ export const EnhancedRentOverview = ({ rentFilter }: { rentFilter: string | null
     }
   };
 
-  const createMissingOverdueRecords = async (existingRecords: RentRecord[]) => {
-    if (!propertyManager?.id) return existingRecords;
+  const createMissingOverdueRecords = async (existingRecords: any[]) => {
+    if (!propertyManager?.id) return [];
 
     const currentDate = new Date();
     const currentMonth = currentDate.getMonth();
     const currentYear = currentDate.getFullYear();
 
-    // Get all tenants
+    // Get all tenants to merge with rent records
     const { data: allTenants } = await supabase
       .from('tenants')
       .select('*')
       .eq('property_manager_id', propertyManager.id);
 
-    if (!allTenants) return existingRecords;
+    if (!allTenants) return [];
 
-    const newRecords = [...existingRecords];
+    // Create a map of tenants for easy lookup
+    const tenantMap = new Map(allTenants.map(tenant => [tenant.id, tenant]));
 
+    // Transform existing records to include tenant data
+    const enrichedRecords: RentRecord[] = existingRecords.map(record => {
+      const tenant = tenantMap.get(record.tenant_id);
+      return {
+        ...record,
+        tenants: tenant ? {
+          id: tenant.id,
+          name: tenant.name,
+          email: tenant.email,
+          phone: tenant.phone,
+          property_address: tenant.property_address,
+          unit_number: tenant.unit_number,
+          rent_amount: tenant.rent_amount
+        } : {
+          id: record.tenant_id,
+          name: 'Unknown Tenant',
+          email: null,
+          phone: null,
+          property_address: 'Unknown Property',
+          unit_number: null,
+          rent_amount: 0
+        }
+      };
+    });
+
+    // Check for missing current month records and create overdue ones
     for (const tenant of allTenants) {
-      // Check if tenant has a record for this month
       const hasCurrentMonthRecord = existingRecords.some(record => {
         const recordDate = new Date(record.due_date);
         return record.tenant_id === tenant.id &&
@@ -193,12 +209,12 @@ export const EnhancedRentOverview = ({ rentFilter }: { rentFilter: string | null
               rent_amount: tenant.rent_amount
             }
           };
-          newRecords.push(overdueRecord);
+          enrichedRecords.push(overdueRecord);
         }
       }
     }
 
-    return newRecords;
+    return enrichedRecords;
   };
 
   useEffect(() => {
