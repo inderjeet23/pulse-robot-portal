@@ -87,7 +87,7 @@ export const EnhancedRentOverview = ({ rentFilter }: { rentFilter: string | null
     notes: ""
   });
 
-  const fetchRentRecords = async () => {
+  const fetchRentRecords = useCallback(async () => {
     if (!propertyManager?.id) return;
     try {
       // Fetch rent records without the join
@@ -112,9 +112,9 @@ export const EnhancedRentOverview = ({ rentFilter }: { rentFilter: string | null
     } finally {
       setLoading(false);
     }
-  };
+  }, [propertyManager?.id, toast]);
 
-  const fetchTenants = async () => {
+  const fetchTenants = useCallback(async () => {
     if (!propertyManager?.id) return;
     try {
       const { data, error } = await supabase
@@ -128,9 +128,9 @@ export const EnhancedRentOverview = ({ rentFilter }: { rentFilter: string | null
     } catch (error) {
       console.error('Error fetching tenants:', error);
     }
-  };
+  }, [propertyManager?.id]);
 
-  const createMissingOverdueRecords = async (existingRecords: any[]) => {
+  const createMissingOverdueRecords = useCallback(async (existingRecords: any[]) => {
     if (!propertyManager?.id) return [];
 
     const currentDate = new Date();
@@ -215,11 +215,13 @@ export const EnhancedRentOverview = ({ rentFilter }: { rentFilter: string | null
     }
 
     return enrichedRecords;
-  };
+  }, [propertyManager?.id]);
 
   useEffect(() => {
-    fetchTenants();
-    fetchRentRecords();
+    if (propertyManager?.id) {
+      fetchTenants();
+      fetchRentRecords();
+    }
   }, [propertyManager?.id, fetchTenants, fetchRentRecords]);
 
   const handleLogPayment = async () => {
